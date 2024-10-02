@@ -29,12 +29,33 @@ def insert_data(conn, data_type, data_value, timestamp=None):
     except Exception as e:
         print(f"Error insertando datos: {e}")
 
-# Función para leer archivos CSV y enviarlos a la base de datos
+# Función para limpiar datos
+def clean_data(df):
+    # Eliminar filas con valores nulos en 'data_value' o 'timestamp'
+    df.dropna(subset=['data_value', 'timestamp'], inplace=True)
+
+    # Eliminar duplicados
+    df.drop_duplicates(inplace=True)
+
+    # Convertir la columna 'timestamp' a formato de fecha si es necesario
+    if 'timestamp' in df.columns:
+        df['timestamp'] = pd.to_datetime(df['timestamp'], errors='coerce')
+        df.dropna(subset=['timestamp'], inplace=True)  # Eliminar filas con fechas inválidas
+
+    # Normalizar la columna 'data_value' si es necesario
+    df['data_value'] = df['data_value'].apply(lambda x: str(x).strip())  # Limpiar espacios
+    return df
+
+# Función para leer archivos CSV, limpiarlos y enviarlos a la base de datos
 def process_csv(file_path, conn, data_type):
     try:
         # Leer archivo CSV
         df = pd.read_csv(file_path)
         print(f"Datos cargados desde {file_path}")
+
+        # Limpiar los datos
+        df = clean_data(df)
+        print(f"Datos limpiados de {file_path}")
 
         # Asumimos que los CSV tienen columnas "data_value" y "timestamp"
         for _, row in df.iterrows():
