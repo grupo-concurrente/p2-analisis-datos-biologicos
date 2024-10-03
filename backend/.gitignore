@@ -34,3 +34,4 @@ build/
 
 venv
 processed_data.csv
+label_encodings.json
