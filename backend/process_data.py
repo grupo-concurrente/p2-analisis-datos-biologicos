@@ -5,6 +5,7 @@ import sys
 import time
 import threading
 import random
+import json  # Para guardar las equivalencias
 
 # Lock para sincronización entre hilos
 progress_lock = threading.Lock()
@@ -42,13 +43,29 @@ column_mapping = {
     'Skeleton': 'skeleton_features'
 }
 
+# Diccionario para almacenar las equivalencias (ahora como arrays)
+label_encodings = {}
+
+# Función para limpiar los valores categóricos (elimina saltos de línea y espacios)
+def clean_category(value):
+    return value.strip()  # Elimina espacios en blanco al inicio/final y saltos de línea
+
 # Función para normalizar y etiquetar columnas categóricas
 def normalize_data(chunk):
     chunk = chunk.dropna()
 
     # Normalización de datos categóricos
     for col in chunk.select_dtypes(include=['object']).columns:
-        chunk[col] = chunk[col].astype('category').cat.codes
+        # Aplicar la función de limpieza a los valores categóricos
+        chunk[col] = chunk[col].apply(clean_category)
+
+        chunk[col] = chunk[col].astype('category')
+
+        # Guardar las equivalencias como listas de categorías en lugar de diccionarios
+        label_encodings[col] = list(chunk[col].cat.categories)
+
+        # Convertir a códigos numéricos
+        chunk[col] = chunk[col].cat.codes
 
     # Simulación del tiempo de procesamiento proporcional al tamaño del chunk
     processing_time = len(chunk) * 0.001
@@ -60,7 +77,7 @@ def normalize_data(chunk):
 
     # Hacer el sleep con el tiempo ajustado
     time.sleep(adjusted_processing_time)
-    
+
     return chunk
 
 # Función para manejar el progreso de manera segura
@@ -74,13 +91,13 @@ def update_progress(step, total_steps):
 # Función principal que se ejecuta por cada fragmento del dataset
 def process_chunk(chunk, step, total_steps):
     print(f"Procesando chunk {step+1} de {total_steps}...")
-    
+
     # Segunda ronda: normalización
     chunk = normalize_data(chunk)
-    
+
     # Actualizar el progreso
     update_progress(step, total_steps)
-    
+
     return chunk
 
 # Función principal del script
@@ -98,13 +115,19 @@ def main(num_threads):
     # Procesar los chunks en paralelo usando ThreadPoolExecutor
     with ThreadPoolExecutor(max_workers=num_threads) as executor:
         results = list(executor.map(process_chunk, chunks, range(num_chunks), [num_chunks] * num_chunks))
-    
+
     # Unir los resultados en un solo dataframe
     final_data = pd.concat(results)
-    
+
     # Guardar los datos procesados
     final_data.to_csv('./data/processed_data.csv', index=False)
+
+    # Guardar las equivalencias en un archivo JSON
+    with open('./data/label_encodings.json', 'w') as f:
+        json.dump(label_encodings, f)
+
     print("Procesamiento completado y datos guardados en 'processed_data.csv'.")
+    print("Equivalencias guardadas en 'label_encodings.json'.")
 
 if __name__ == "__main__":
     # Obtener el número de hilos de los argumentos de línea de comandos
