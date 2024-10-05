@@ -1,24 +1,23 @@
-import { useEffect, useState } from 'react'
+import { SetStateAction, useEffect, useState } from 'react'
 import axios from 'axios'
 import Lottie from 'lottie-react'
 import loading from '@/lotties/loading.json'
 import { ProcessingStatus } from '@/lib/types'
-import { LoginProps } from './Login'
 import { useNavigate } from 'react-router-dom'
 
-const Landing = ({ setIsAuthenticated, setIsDataFetched }: LoginProps) => {
+const Landing = ({
+  setIsDataFetched,
+}: {
+  setIsDataFetched: (value: SetStateAction<boolean>) => void
+}) => {
   const navigate = useNavigate()
-  const [numThreads, setNumThreads] = useState(4)
+  const [procThreads, setProcThreads] = useState(1)
+  const [saveThreads, setSaveThreads] = useState(1)
   const [processingTime, setProcessingTime] = useState(NaN)
   const [savingTime, setSavingTime] = useState(NaN)
   const [status, setStatus] = useState<ProcessingStatus>(
     ProcessingStatus.SELECTION
   )
-
-  const handleLogout = () => {
-    setIsAuthenticated(false)
-    navigate('/login')
-  }
 
   useEffect(() => {
     if (status === ProcessingStatus.SAVED) {
@@ -26,23 +25,11 @@ const Landing = ({ setIsAuthenticated, setIsDataFetched }: LoginProps) => {
     }
   }, [status])
 
-  const navigateToDashboard = () => {
-    navigate('/dashboard')
-  }
-
-  const incrementThreadsNumber = () => {
-    setNumThreads(numThreads + 1)
-  }
-
-  const decrementThreadsNumber = () => {
-    setNumThreads(numThreads - 1)
-  }
-
   const handleProcessData = () => {
     setStatus(ProcessingStatus.PROCESSING)
     axios
       .post('http://localhost:8080/public/process-data', null, {
-        params: { numThreads: numThreads },
+        params: { numThreads: procThreads },
       })
       .then((response) => {
         setProcessingTime(parseFloat(response.data))
@@ -58,7 +45,7 @@ const Landing = ({ setIsAuthenticated, setIsDataFetched }: LoginProps) => {
     setStatus(ProcessingStatus.SAVING)
     axios
       .post('http://localhost:8080/public/save-data', null, {
-        params: { numThreads: numThreads },
+        params: { numThreads: saveThreads },
       })
       .then((response) => {
         setSavingTime(parseFloat(response.data))
@@ -76,11 +63,23 @@ const Landing = ({ setIsAuthenticated, setIsDataFetched }: LoginProps) => {
       default:
         return (
           <>
-            <h1 className='text-4xl'>Número de hilos</h1>
-            <div className='bg-red-300 opacity-75 w-48 h-28 rounded-2xl flex items-center justify-between text-6xl p-1'>
-              <button onClick={decrementThreadsNumber}>{'<'}</button>
-              <h1>{numThreads}</h1>
-              <button onClick={incrementThreadsNumber}>{'>'}</button>
+            <h1 className='text-4xl'>Número de hilos para PREPROCESADO</h1>
+            <div className='bg-fuchsia-600 opacity-75 w-48 h-28 rounded-2xl flex items-center justify-between text-6xl px-3 bg-opacity-70'>
+              <button
+                onClick={() => {
+                  procThreads > 1 && setProcThreads(procThreads - 1)
+                }}
+              >
+                {'<'}
+              </button>
+              <h1>{procThreads}</h1>
+              <button
+                onClick={() => {
+                  procThreads < 12 && setProcThreads(procThreads + 1)
+                }}
+              >
+                {'>'}
+              </button>
             </div>
             <button
               className='text-2xl border-4 py-2 px-3 rounded-xl border-gray-900'
@@ -96,7 +95,7 @@ const Landing = ({ setIsAuthenticated, setIsDataFetched }: LoginProps) => {
             <Lottie
               animationData={loading}
               loop={true}
-              className='w-72 h-auto rotate-90'
+              className='w-72 h-auto rotate-90 my-24'
             />
             <h1>PROCESANDO DATOS...</h1>
           </>
@@ -105,15 +104,25 @@ const Landing = ({ setIsAuthenticated, setIsDataFetched }: LoginProps) => {
         return (
           <>
             <h1 className='text-5xl text-center'>
-              Datos procesados
-              <br />
-              en {processingTime} seg.
+              Preprocesado: {processingTime} seg. | {procThreads} hilos
             </h1>
-            <h1 className='text-4xl'>Número de hilos</h1>
-            <div className='bg-red-300 opacity-75 w-48 h-28 rounded-2xl flex items-center justify-between text-6xl p-1'>
-              <button onClick={decrementThreadsNumber}>{'<'}</button>
-              <h1>{numThreads}</h1>
-              <button onClick={incrementThreadsNumber}>{'>'}</button>
+            <h1 className='text-4xl'>Número de hilos para GUARDADO</h1>
+            <div className='bg-fuchsia-300 opacity-75 w-48 h-28 rounded-2xl flex items-center justify-between text-6xl p-1'>
+              <button
+                onClick={() => {
+                  saveThreads > 1 && setSaveThreads(saveThreads - 1)
+                }}
+              >
+                {'<'}
+              </button>
+              <h1>{saveThreads}</h1>
+              <button
+                onClick={() => {
+                  saveThreads < 12 && setSaveThreads(saveThreads + 1)
+                }}
+              >
+                {'>'}
+              </button>
             </div>
             <button
               className='text-2xl border-4 py-2 px-3 rounded-xl border-gray-900'
@@ -127,14 +136,12 @@ const Landing = ({ setIsAuthenticated, setIsDataFetched }: LoginProps) => {
         return (
           <>
             <h1 className='text-5xl text-center'>
-              Datos procesados
-              <br />
-              en {processingTime} seg.
+              Preprocesado: {processingTime} seg. | {procThreads} hilos
             </h1>
             <Lottie
               animationData={loading}
               loop={true}
-              className='w-72 h-auto rotate-90'
+              className='w-72 h-auto rotate-90 my-24'
             />
             <h1>GUARDANDO DATOS...</h1>
           </>
@@ -143,18 +150,18 @@ const Landing = ({ setIsAuthenticated, setIsDataFetched }: LoginProps) => {
         return (
           <>
             <h1 className='text-5xl text-center'>
-              Datos procesados
-              <br />
-              en {processingTime} seg.
+              Preprocesado: {processingTime} seg. | {procThreads} hilos
             </h1>
             <h1 className='text-5xl text-center'>
-              Datos guardados en
-              <br />
-              en {savingTime} seg.
+              Guardado en BD: {savingTime} seg. | {saveThreads} hilos
+            </h1>
+            <br />
+            <h1 className='text-5xl text-center mb-8'>
+              Total: {processingTime + savingTime} segundos
             </h1>
             <button
               className='text-2xl border-4 py-2 px-3 rounded-xl border-gray-900'
-              onClick={navigateToDashboard}
+              onClick={() => navigate('/dashboard')}
             >
               IR AL DASHBOARD DE ANÁLISIS
             </button>
@@ -164,7 +171,7 @@ const Landing = ({ setIsAuthenticated, setIsDataFetched }: LoginProps) => {
   }
 
   return (
-    <div className='w-screen h-screen bg-gradient-to-b from-blue-200 to-blue-400 flex flex-col items-center justify-center gap-10'>
+    <div className='w-full h-full flex flex-col items-center justify-center gap-10'>
       {renderContent()}
     </div>
   )
