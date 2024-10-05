@@ -16,8 +16,8 @@ public class UserConfig {
     @Bean
     CommandLineRunner userRunner(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
-            User defaultAdmin = new User( "admin@umbrellaacademy.com", "admin", passwordEncoder.encode("admin"), Rol.ADMIN);
-            User defaultUser = new User( "user@umbrellaacademy.com", "user", passwordEncoder.encode("user"), Rol.USER);
+            User defaultAdmin = new User( "admin@umbrellacorporation.com", "admin", passwordEncoder.encode("admin"), Rol.ADMIN);
+            User defaultUser = new User( "user@umbrellacorporation.com", "user", passwordEncoder.encode("user"), Rol.USER);
             userRepository.deleteAll();
             userRepository.saveAll(List.of(defaultAdmin, defaultUser));
         };
