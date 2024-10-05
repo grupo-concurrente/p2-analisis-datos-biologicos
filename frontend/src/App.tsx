@@ -6,14 +6,22 @@ import {
   Routes,
   Navigate,
 } from 'react-router-dom'
-import Login from '@/pages/Login'
-import Landing from '@/pages/Landing'
-import Dashboard from './pages/Dashboard'
+import { AnimatedBackground } from 'animated-backgrounds'
+import DashboardPage from './pages/DashboardPage'
+import LoginPage from './pages/LoginPage'
+import LandingPage from './pages/LandingPage'
 
 function App() {
-  // Mock state for authentication
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isDataFetched, setIsDataFetched] = useState(false)
+
+  const logoutUser = () => {
+    setIsAuthenticated(false)
+  }
+
+  const autenticateUser = () => {
+    setIsAuthenticated(true)
+  }
 
   return (
     <Router>
@@ -29,7 +37,13 @@ function App() {
                 <Navigate to='/landing' replace />
               )
             ) : (
-              <Login setIsAuthenticated={setIsAuthenticated} />
+              <>
+                <AnimatedBackground
+                  animationName='cosmicDust'
+                  style={{ opacity: 0.07 }}
+                />
+                <LoginPage autenticateUser={autenticateUser} />
+              </>
             )
           }
         />
@@ -39,8 +53,8 @@ function App() {
           path='/landing'
           element={
             isAuthenticated ? (
-              <Landing
-                setIsAuthenticated={setIsAuthenticated}
+              <LandingPage
+                logoutUser={logoutUser}
                 setIsDataFetched={setIsDataFetched}
               />
             ) : (
@@ -54,7 +68,7 @@ function App() {
           path='/dashboard'
           element={
             isAuthenticated && isDataFetched ? (
-              <Dashboard setIsAuthenticated={setIsAuthenticated} />
+              <DashboardPage logoutUser={logoutUser} />
             ) : (
               <Navigate to='/login' replace />
             )

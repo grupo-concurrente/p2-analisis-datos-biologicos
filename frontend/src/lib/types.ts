@@ -1,10 +1,12 @@
+import { SetStateAction } from 'react'
+
 export enum ProcessingStatus {
   SELECTION,
   PROCESSING,
   PROCESSED,
   SAVING,
   SAVED,
-  ERROR
+  ERROR,
 }
 
 export interface AuthResponse {
@@ -12,7 +14,18 @@ export interface AuthResponse {
   info: string
 }
 
-// Tipo para representar un dato biologico
+export interface LoginProps {
+  autenticateUser: ({ redirectToPath }: { redirectToPath?: string }) => void
+}
+
+export interface BasePageProps {
+  logoutUser: () => void
+}
+
+export interface LandingPageProps extends BasePageProps {
+  setIsDataFetched: (value: SetStateAction<boolean>) => void
+}
+
 export interface BiologicalData {
   genusSpecies: number
   timePeriod: number

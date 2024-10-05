@@ -1,13 +1,25 @@
 import { useEffect, useState } from 'react'
-import { LoginProps } from './Login'
+import { fetchData } from '@/lib/utils'
+import { BiologicalData } from '@/lib/types'
 
-export default function Dashboard({ setIsAuthenticated }: LoginProps) {
-  const [data, setData] = useState([])
+export default function Dashboard() {
+  const [data, setData] = useState<BiologicalData[]>([])
 
-  useEffect(() => {},[])
+  useEffect(() => {
+    const fetchDataAsync = async () => {
+      const { biologicalData } = await fetchData()
+      setData(biologicalData)
+    }
+
+    fetchDataAsync()
+  }, [])
+
+  useEffect(() => {
+    console.log('New data detected: ', data)
+  }, [data])
 
   return (
-    <div className='w-screen h-screen grid grid-cols-9 grid-rows-6 gap-4 w-full h-full'>
+    <div className='w-full h-full grid grid-cols-9 grid-rows-6 gap-4 pt-16'>
       <div className='col-span-4 row-span-4 bg-red-500'>1</div>
       <div className='col-span-3 row-span-2 col-start-1 row-start-5 bg-green-500'>
         3
