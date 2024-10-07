@@ -1,10 +1,10 @@
-package com.example.demo;
+package com.umbrellacorporation.backend;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BackendUmbrellaApplicationTests {
+class BackendApplicationTests {
 
 	@Test
 	void contextLoads() {
