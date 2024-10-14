@@ -30,11 +30,15 @@ public class BiologicalDataService {
         dataRepository.save(data);
     }
 
-    public void deteleDataEntry(Long id) {
+    public void deleteDataEntry(Long id) {
         boolean exists = dataRepository.existsById(id);
         if (!exists) {
             throw new IllegalStateException("Data entry with id " + id + " doesn't exist.");
         }
         dataRepository.deleteById(id);
+    }
+
+    public void deleteAllDataEntries() {
+        dataRepository.deleteAll();
     }
 }

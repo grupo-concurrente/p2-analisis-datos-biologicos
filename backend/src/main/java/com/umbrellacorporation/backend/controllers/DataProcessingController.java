@@ -139,7 +139,7 @@ public class DataProcessingController {
             e.printStackTrace();
             return;
         }
-
+        dataService.deleteAllDataEntries();
         saveDataInParallel(dataList, numThreads);
     }
 

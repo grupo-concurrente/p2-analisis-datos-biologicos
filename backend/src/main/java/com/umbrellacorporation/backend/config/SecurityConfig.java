@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/public/api/v1/health").permitAll()
                         .requestMatchers("/public/login").permitAll()
+                        .requestMatchers("/public/register").permitAll()
                         .requestMatchers("/public/processing-status").permitAll()
                         .requestMatchers("/public/process-data").permitAll()
                         .requestMatchers("/public/save-data").permitAll()

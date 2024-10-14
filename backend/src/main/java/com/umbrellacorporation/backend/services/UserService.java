@@ -77,6 +77,11 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public boolean existsByEmail(String email) {
+        return userRepository.findUserByEmail(email).isPresent();
+    }
+
+
     public boolean verifyUser(String email, String rawPassword) {
         Optional<User> userOpt = userRepository.findUserByEmail(email);
 
