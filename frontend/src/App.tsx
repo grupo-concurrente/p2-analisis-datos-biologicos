@@ -1,4 +1,6 @@
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-expect-error
     ```typescriptreact
 import './App.css'
 import { useState, useEffect } from 'react'
@@ -112,5 +114,3 @@ function App() {
 
 export default App
 ```
-
-E
