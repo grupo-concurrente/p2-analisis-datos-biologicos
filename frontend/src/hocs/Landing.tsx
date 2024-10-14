@@ -104,7 +104,8 @@ const Landing = ({
         return (
           <>
             <h1 className='text-5xl text-center'>
-              Preprocesado: {processingTime} seg. | {procThreads} hilos
+              Preprocesado: {processingTime.toFixed(3)} seg. | {procThreads}{' '}
+              hilos
             </h1>
             <h1 className='text-4xl'>Número de hilos para GUARDADO</h1>
             <div className='bg-fuchsia-300 opacity-75 w-48 h-28 rounded-2xl flex items-center justify-between text-6xl p-1'>
@@ -136,7 +137,7 @@ const Landing = ({
         return (
           <>
             <h1 className='text-5xl text-center'>
-              Preprocesado: {processingTime} seg. | {procThreads} hilos
+              Preprocesado: {processingTime.toFixed(3)} seg. | {procThreads} hilos
             </h1>
             <Lottie
               animationData={loading}
@@ -150,14 +151,14 @@ const Landing = ({
         return (
           <>
             <h1 className='text-5xl text-center'>
-              Preprocesado: {processingTime} seg. | {procThreads} hilos
+              Preprocesado: {processingTime.toFixed(3)} seg. | {procThreads} hilos
             </h1>
             <h1 className='text-5xl text-center'>
-              Guardado en BD: {savingTime} seg. | {saveThreads} hilos
+              Guardado en BD: {savingTime.toFixed(3)} seg. | {saveThreads} hilos
             </h1>
             <br />
             <h1 className='text-5xl text-center mb-8'>
-              Total: {processingTime + savingTime} segundos
+              Total: {(processingTime + savingTime).toFixed(3)} segundos
             </h1>
             <button
               className='text-2xl border-4 py-2 px-3 rounded-xl border-gray-900'
