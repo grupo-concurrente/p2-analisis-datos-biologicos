@@ -5,7 +5,7 @@ import { AnimatedBackground } from 'animated-backgrounds'
 
 function LandingPage({ logoutUser, setIsDataFetched }: LandingPageProps) {
   return (
-    <div className='w-screen h-screen p-0 m-0'>
+    <div className='select-none w-screen h-screen p-0 m-0'>
       <AnimatedBackground
         animationName='cosmicDust'
         style={{ opacity: 0.08 }}
