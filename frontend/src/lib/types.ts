@@ -15,7 +15,7 @@ export interface AuthResponse {
 }
 
 export interface LoginProps {
-  autenticateUser: ({ redirectToPath }: { redirectToPath?: string }) => void
+  authSession: () => void
 }
 
 export interface BasePageProps {
@@ -26,7 +26,7 @@ export interface LandingPageProps extends BasePageProps {
   setIsDataFetched: (value: SetStateAction<boolean>) => void
 }
 
-export interface BiologicalData {
+export interface RawBiologicalData {
   genusSpecies: number
   timePeriod: number
   location: number
@@ -55,4 +55,35 @@ export interface BiologicalData {
   anatomyFeatures: number
   migrated: number
   skeletonFeatures: number
+}
+
+export interface BiologicalData {
+  genusSpecies: string
+  timePeriod: number
+  location: string
+  zone: string
+  currentCountry: string
+  habitat: string
+  cranialCapacity: number
+  height: number
+  incisorSize: string
+  jawShape: string
+  torusSupraorbital: string
+  prognathism: string
+  foramenMagnumPosition: string
+  canineSize: string
+  caninesShape: string
+  toothEnamel: string
+  tecnoCulture: string
+  tecnoType: string
+  bipedalism: string
+  armsLength: string
+  feetStructure: string
+  dietType: string
+  sexualDimorphism: string
+  hipStructure: string
+  verticalFrontStructure: string
+  anatomyFeatures: string
+  migrated: string
+  skeletonFeatures: string
 }

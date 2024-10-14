@@ -19,7 +19,7 @@ function App() {
     setIsAuthenticated(false)
   }
 
-  const autenticateUser = () => {
+  const authSession = () => {
     setIsAuthenticated(true)
   }
 
@@ -40,9 +40,9 @@ function App() {
               <>
                 <AnimatedBackground
                   animationName='cosmicDust'
-                  style={{ opacity: 0.07 }}
+                  style={{ opacity: 0.09 }}
                 />
-                <LoginPage autenticateUser={autenticateUser} />
+                <LoginPage authSession={authSession} />
               </>
             )
           }

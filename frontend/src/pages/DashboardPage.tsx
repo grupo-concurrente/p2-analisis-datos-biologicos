@@ -4,7 +4,7 @@ import { BasePageProps } from '@/lib/types'
 
 function DashboardPage({ logoutUser }: BasePageProps) {
   return (
-    <div className='w-screen h-screen p-0 m-0'>
+    <div className='select-none w-screen h-screen p-0 m-0'>
       <Header handleLogout={logoutUser} />
       <Dashboard />
     </div>

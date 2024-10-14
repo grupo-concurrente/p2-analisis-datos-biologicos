@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { fetchData } from '@/lib/utils'
+import { decodeData, fetchData } from '@/lib/utils'
 import { BiologicalData } from '@/lib/types'
 
 export default function Dashboard() {
@@ -7,20 +7,25 @@ export default function Dashboard() {
 
   useEffect(() => {
     const fetchDataAsync = async () => {
-      const { biologicalData } = await fetchData()
-      setData(biologicalData)
+      const { biologicalData } = await fetchData(true)
+      setData(decodeData({ data: biologicalData }))
     }
 
     fetchDataAsync()
   }, [])
 
-  useEffect(() => {
-    console.log('New data detected: ', data)
-  }, [data])
-
   return (
     <div className='w-full h-full grid grid-cols-9 grid-rows-6 gap-4 pt-16'>
-      <div className='col-span-4 row-span-4 bg-red-500'>1</div>
+      <div className='col-span-4 row-span-4 bg-red-500'>
+        Tipo de gráfico: Mapa interactivo (Choropleth o de puntos) Magnitudes a
+        graficar: Distribución geográfica basada en la variable location o
+        currentCountry. Añadir un selector que permita elegir qué dato
+        visualizar en el mapa, como: Altura, Capacidad Craneal, Estructura de la
+        cadera, etc. Muestra puntos de migración si es relevante (migrated).
+        Interactividad: Zoom, pan y posibilidad de hacer clic en un país o
+        región para mostrar detalles adicionales sobre esa área. Cambiar el tipo
+        de información según los filtros seleccionados.
+      </div>
       <div className='col-span-3 row-span-2 col-start-1 row-start-5 bg-green-500'>
         3
       </div>
