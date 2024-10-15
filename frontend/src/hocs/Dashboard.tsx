@@ -10,9 +10,9 @@ export default function Dashboard() {
       const { biologicalData } = await fetchData(true)
       setData(decodeData({ data: biologicalData }))
     }
-
     fetchDataAsync()
   }, [])
+
 
   return (
     <div className='w-full h-full grid grid-cols-9 grid-rows-6 gap-4 pt-16'>

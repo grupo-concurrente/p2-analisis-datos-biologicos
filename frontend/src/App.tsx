@@ -1,7 +1,3 @@
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-expect-error
-    ```typescriptreact
 import './App.css'
 import { useState, useEffect } from 'react'
 import {
@@ -20,29 +16,44 @@ import Stomp from 'stompjs'
 function App() {
     const [isAuthenticated, setIsAuthenticated] = useState(false)
     const [isDataFetched, setIsDataFetched] = useState(false)
+    const [biologicalData, setBiologicalData] = useState([])
+    const [stompClient, setStompClient] = useState<Stomp.Client | null>(null)
 
     useEffect(() => {
         const socket = new SockJS('http://localhost:8080/ws')
-        const stompClient = Stomp.over(socket)
+        const client = Stomp.over(socket)
 
-        stompClient.connect({}, (frame) => {
-            console.log('Connected: ' + frame)
-            stompClient.subscribe('/topic/messages', (message) => {
-                console.log(message.body)
+        const connectCallback = () => {
+            console.log('Connected to WebSocket')
+            client.subscribe('/topic/biological-data', (message) => {
+                setBiologicalData(JSON.parse(message.body))
             })
-        })
+        }
+
+        const errorCallback = (error) => {
+            console.error('WebSocket error:', error)
+            setTimeout(() => {
+                client.connect({}, connectCallback, errorCallback)
+            }, 5000)
+        }
+
+        client.connect({}, connectCallback, errorCallback)
+
+        setStompClient(client)
 
         return () => {
-            if (stompClient) {
-                stompClient.disconnect()
+            if (client) {
+                client.disconnect()
             }
         }
     }, [])
 
     const sendMessage = (message: string) => {
-        const socket = new SockJS('http://localhost:8080/ws')
-        const stompClient = Stomp.over(socket)
-        stompClient.send('/app/message', {}, JSON.stringify({ 'content': message }))
+        if (stompClient && stompClient.connected) {
+            stompClient.send('/app/message', {}, JSON.stringify({ 'content': message }))
+        } else {
+            console.error('no hay conexion a stomp')
+        }
     }
 
     const logoutUser = () => {
@@ -52,7 +63,6 @@ function App() {
     const authSession = () => {
         setIsAuthenticated(true)
     }
-
     return (
         <Router>
             <Routes>
@@ -93,17 +103,17 @@ function App() {
                     }
                 />
 
-                {/* Ruta protegida de Dashboard */}
                 <Route
                     path='/dashboard'
                     element={
-                        isAuthenticated && isDataFetched ? (
-                            <DashboardPage logoutUser={logoutUser} />
+                        isAuthenticated && isDataFetched && biologicalData ? (
+                            <DashboardPage logoutUser={logoutUser} biologicalData={biologicalData} />
                         ) : (
                             <Navigate to='/login' replace />
                         )
                     }
                 />
+
 
                 {/* Redirige cualquier ruta desconocida a /login */}
                 <Route path='*' element={<Navigate to='/login' replace />} />
@@ -113,4 +123,3 @@ function App() {
 }
 
 export default App
-```
