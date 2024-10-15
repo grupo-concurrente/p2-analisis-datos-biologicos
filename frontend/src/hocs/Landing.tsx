@@ -11,8 +11,8 @@ const Landing = ({
   setIsDataFetched: (value: SetStateAction<boolean>) => void
 }) => {
   const navigate = useNavigate()
-  const [procThreads, setProcThreads] = useState(1)
-  const [saveThreads, setSaveThreads] = useState(1)
+  const [procThreads, setProcThreads] = useState(5)
+  const [saveThreads, setSaveThreads] = useState(5)
   const [processingTime, setProcessingTime] = useState(NaN)
   const [savingTime, setSavingTime] = useState(NaN)
   const [status, setStatus] = useState<ProcessingStatus>(
@@ -21,7 +21,7 @@ const Landing = ({
 
   useEffect(() => {
     if (status === ProcessingStatus.SAVED) {
-      setIsDataFetched && setIsDataFetched(true)
+      setIsDataFetched(true)
     }
   }, [status])
 
