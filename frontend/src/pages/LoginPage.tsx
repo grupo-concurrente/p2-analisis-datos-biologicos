@@ -95,7 +95,7 @@ export default function LoginPage({ authSession }: LoginProps) {
                 <Input
                   id='password'
                   type='password'
-                  placeholder='**********'
+                  placeholder='*******'
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -113,7 +113,7 @@ export default function LoginPage({ authSession }: LoginProps) {
               <p className='text-balance'>
                 ¿No tienes cuenta?{' '}
                 <span
-                  className='text-blue-600 cursor-pointer'
+                  className='text-fuchsia-700 cursor-pointer'
                   onClick={toggleRegisterLogin}
                 >
                   Regístrate
@@ -166,7 +166,7 @@ export default function LoginPage({ authSession }: LoginProps) {
                 <Input
                   id='password'
                   type='password'
-                  placeholder='**********'
+                  placeholder='*******'
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -181,7 +181,7 @@ export default function LoginPage({ authSession }: LoginProps) {
                 <Input
                   id='password-repeated'
                   type='password'
-                  placeholder='**********'
+                  placeholder='*******'
                   value={repeatedPassword}
                   onChange={(e) => setRepeatedPassword(e.target.value)}
                   required
@@ -199,7 +199,7 @@ export default function LoginPage({ authSession }: LoginProps) {
               <p className='text-balance'>
                 ¿Ya tienes cuenta?{' '}
                 <span
-                  className='text-blue-600 cursor-pointer'
+                  className='text-fuchsia-700 cursor-pointer'
                   onClick={toggleRegisterLogin}
                 >
                   Inicia sesión
