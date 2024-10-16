@@ -4,9 +4,12 @@ import Logo from '@/components/Logo'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { LoginProps } from '@/lib/types'
 import { authenticateUser, registerUser } from '@/lib/utils'
 import { useState } from 'react'
+
+interface LoginProps {
+  authSession: () => void
+}
 
 export default function LoginPage({ authSession }: LoginProps) {
   const [email, setEmail] = useState('')
@@ -19,7 +22,13 @@ export default function LoginPage({ authSession }: LoginProps) {
   const [registerStatus, setRegisterStatus] = useState(false)
   const [isLoginForm, setIsLoginForm] = useState(true)
 
-  const toggleRegisterLogin = () => setIsLoginForm((prevState) => !prevState)
+  const toggleRegisterLogin = () => {
+    setIsLoginForm((prevState) => !prevState)
+    setName('')
+    setEmail('')
+    setPassword('')
+    setRepeatedPassword('')
+  }
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -53,10 +62,6 @@ export default function LoginPage({ authSession }: LoginProps) {
     setTimeout(() => setRegisterMessage(info), 50)
     if (status) {
       setTimeout(toggleRegisterLogin, 500)
-      setName('')
-      setEmail('')
-      setPassword('')
-      setRepeatedPassword('')
     }
   }
 
@@ -113,7 +118,7 @@ export default function LoginPage({ authSession }: LoginProps) {
               <p className='text-balance'>
                 ¿No tienes cuenta?{' '}
                 <span
-                  className='text-fuchsia-700 cursor-pointer'
+                  className='text-fuchsia-800 cursor-pointer'
                   onClick={toggleRegisterLogin}
                 >
                   Regístrate
@@ -121,7 +126,7 @@ export default function LoginPage({ authSession }: LoginProps) {
               </p>
               <Button
                 type='submit'
-                className='w-full bg-fuchsia-900 hover:bg-fuchsia-700'
+                className='w-full bg-fuchsia-900 hover:bg-fuchsia-800'
               >
                 Iniciar sesión
               </Button>
@@ -199,7 +204,7 @@ export default function LoginPage({ authSession }: LoginProps) {
               <p className='text-balance'>
                 ¿Ya tienes cuenta?{' '}
                 <span
-                  className='text-fuchsia-700 cursor-pointer'
+                  className='text-fuchsia-800 cursor-pointer'
                   onClick={toggleRegisterLogin}
                 >
                   Inicia sesión
@@ -207,7 +212,7 @@ export default function LoginPage({ authSession }: LoginProps) {
               </p>
               <Button
                 type='submit'
-                className='w-full bg-fuchsia-900 hover:bg-fuchsia-700'
+                className='w-full bg-fuchsia-900 hover:bg-fuchsia-800'
               >
                 Registrarse
               </Button>
