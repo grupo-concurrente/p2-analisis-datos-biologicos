@@ -7,10 +7,11 @@ interface SelectModePageProps extends BasePageProps, SelectModeProps {}
 const SelectModePage: React.FC<SelectModePageProps> = ({
   logoutUser,
   setMode,
+  setData,
 }) => {
   return (
     <GenericPage logoutUser={logoutUser}>
-      <SelectMode setMode={setMode} />
+      <SelectMode setMode={setMode} setData={setData} />
     </GenericPage>
   )
 }
