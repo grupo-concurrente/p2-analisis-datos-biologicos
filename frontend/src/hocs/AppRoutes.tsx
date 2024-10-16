@@ -1,7 +1,7 @@
 import AnimatedBackgroundWrapper from '@/components/background/AnimatedBackgroundWrapper'
 import ProtectedModeRoute from '@/components/security/ProtectedModeRoute'
 import ProtectedRoute from '@/components/security/ProtectedRoute'
-import { UseMode } from '@/lib/types'
+import { BiologicalData, UseMode } from '@/lib/types'
 import AuthPage from '@/pages/AuthPage'
 import DashboardPage from '@/pages/DashboardPage'
 import SelectModePage from '@/pages/SelectModePage'
@@ -11,7 +11,8 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 interface AppRoutesProps {
   isAuthenticated: boolean
   useMode: UseMode
-  isDataFetched: boolean
+  data: BiologicalData[]
+  setData: (value: SetStateAction<BiologicalData[]>) => void
   authSession: () => void
   logoutUser: () => void
   setUseMode: (value: SetStateAction<UseMode>) => void
@@ -20,7 +21,8 @@ interface AppRoutesProps {
 export default function AppRoutes({
   isAuthenticated,
   useMode,
-  isDataFetched,
+  data,
+  setData,
   authSession,
   logoutUser,
   setUseMode,
@@ -44,7 +46,10 @@ export default function AppRoutes({
         path='/select-mode'
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            <SelectModePage logoutUser={logoutUser} setMode={setUseMode} />
+            <>
+              <AnimatedBackgroundWrapper />
+              <SelectModePage logoutUser={logoutUser} setMode={setUseMode} />
+            </>
           </ProtectedRoute>
         }
       />
@@ -56,8 +61,9 @@ export default function AppRoutes({
             useMode={useMode}
             requiredMode={UseMode.REAL_TIME}
           >
-            {/* Componente a implementar */}
-            <></>
+            <>
+              <AnimatedBackgroundWrapper />
+            </>
           </ProtectedModeRoute>
         }
       />
@@ -69,8 +75,9 @@ export default function AppRoutes({
             useMode={useMode}
             requiredMode={UseMode.NEAR_REAL_TIME}
           >
-            {/* Componente a implementar */}
-            <></>
+            <>
+              <AnimatedBackgroundWrapper />
+            </>
           </ProtectedModeRoute>
         }
       />
@@ -78,8 +85,8 @@ export default function AppRoutes({
         path='/dashboard'
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            {isDataFetched || useMode === UseMode.MOCKING ? (
-              <DashboardPage logoutUser={logoutUser} />
+            {data.length || useMode === UseMode.MOCKING ? (
+              <DashboardPage logoutUser={logoutUser} data={data} />
             ) : (
               <Navigate to='/login' replace />
             )}
