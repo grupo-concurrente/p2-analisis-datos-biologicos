@@ -10,6 +10,7 @@ import json  # Para guardar las equivalencias
 # Lock para sincronización entre hilos
 progress_lock = threading.Lock()
 completed_chunks = 0  # Variable global para llevar el progreso
+progress_file = './data/progress.json'  # Archivo para guardar el progreso
 
 # Diccionario de mapeo para renombrar las columnas
 column_mapping = {
@@ -50,9 +51,36 @@ label_encodings = {}
 def clean_category(value):
     return value.strip()  # Elimina espacios en blanco al inicio/final y saltos de línea
 
+# Inicializar archivo de progreso
+def init_progress(num_chunks):
+    progress_data = {f"chunk_{i+1}": 0 for i in range(num_chunks)}
+    with open(progress_file, 'w') as f:
+        json.dump(progress_data, f)
+
+# Función para manejar el progreso de manera segura
+def update_progress(chunk_number, progress, total_columns):
+    with progress_lock:
+        # Leer y actualizar el archivo de progreso
+        with open(progress_file, 'r') as f:
+            progress_data = json.load(f)
+
+        # Calcular el porcentaje del progreso de la columna
+        column_progress = int((progress / total_columns) * 100)
+
+        # Actualizar el progreso para este chunk
+        progress_data[f"chunk_{chunk_number + 1}"] = column_progress
+
+        # Guardar el nuevo progreso en el archivo
+        with open(progress_file, 'w') as f:
+            json.dump(progress_data, f)
+
+        print(f"Progreso (Chunk {chunk_number + 1}): {column_progress}%")
+
 # Función para normalizar y etiquetar columnas categóricas
-def normalize_data(chunk):
+def normalize_data(chunk, chunk_number):
     chunk = chunk.dropna()
+    total_columns = len(chunk.select_dtypes(include=['object']).columns)
+    processed_columns = 0
 
     # Normalización de datos categóricos
     for col in chunk.select_dtypes(include=['object']).columns:
@@ -67,36 +95,29 @@ def normalize_data(chunk):
         # Convertir a códigos numéricos
         chunk[col] = chunk[col].cat.codes
 
-    # Simulación del tiempo de procesamiento proporcional al tamaño del chunk
-    processing_time = len(chunk) * 0.001
+        # Simulación del tiempo de procesamiento proporcional al tamaño del chunk
+        processing_time = len(chunk) * 0.0001
 
-    # Añadir variación aleatoria del 20% al tiempo de procesamiento
-    variation = processing_time * 0.3
-    random_adjustment = random.uniform(-variation, variation)
-    adjusted_processing_time = processing_time + random_adjustment
+        # Añadir variación aleatoria del 50% al tiempo de procesamiento
+        variation = processing_time * 0.5
+        random_adjustment = random.uniform(-variation, variation)
+        adjusted_processing_time = processing_time + random_adjustment
 
-    # Hacer el sleep con el tiempo ajustado
-    time.sleep(adjusted_processing_time)
+        # Hacer el sleep con el tiempo ajustado
+        time.sleep(adjusted_processing_time)
+
+        # Actualizar el progreso por cada columna procesada
+        processed_columns += 1
+        update_progress(chunk_number, processed_columns, total_columns)  # El número de chunk se pasa desde `process_chunk`
 
     return chunk
 
-# Función para manejar el progreso de manera segura
-def update_progress(step, total_steps):
-    global completed_chunks
-    with progress_lock:
-        completed_chunks += 1
-        progress = int((completed_chunks / total_steps) * 100)
-        print(f"Progreso: {progress}%")
-
 # Función principal que se ejecuta por cada fragmento del dataset
 def process_chunk(chunk, step, total_steps):
-    print(f"Procesando chunk {step+1} de {total_steps}...")
+    print(f"Procesando chunk {step + 1} de {total_steps}...")
 
     # Segunda ronda: normalización
-    chunk = normalize_data(chunk)
-
-    # Actualizar el progreso
-    update_progress(step, total_steps)
+    chunk = normalize_data(chunk, step)
 
     return chunk
 
@@ -111,6 +132,9 @@ def main(num_threads):
     # Dividir el dataset en fragmentos según el número de hilos
     num_chunks = num_threads
     chunks = np.array_split(data, num_chunks)
+
+    # Inicializar el archivo de progreso
+    init_progress(num_chunks)
 
     # Procesar los chunks en paralelo usando ThreadPoolExecutor
     with ThreadPoolExecutor(max_workers=num_threads) as executor:
