@@ -1,12 +1,8 @@
-import { SetStateAction } from 'react'
-
-export enum ProcessingStatus {
-  SELECTION,
-  PROCESSING,
-  PROCESSED,
-  SAVING,
-  SAVED,
-  ERROR,
+export enum UseMode {
+  NONE,
+  MOCKING,
+  REAL_TIME,
+  NEAR_REAL_TIME,
 }
 
 export interface AuthResponse {
@@ -14,16 +10,8 @@ export interface AuthResponse {
   info: string
 }
 
-export interface LoginProps {
-  authSession: () => void
-}
-
 export interface BasePageProps {
   logoutUser: () => void
-}
-
-export interface LandingPageProps extends BasePageProps {
-  setIsDataFetched: (value: SetStateAction<boolean>) => void
 }
 
 export interface RawBiologicalData {
