@@ -27,6 +27,8 @@ export default function AppRoutes({
   logoutUser,
   setUseMode,
 }: AppRoutesProps) {
+  const dataExists = data.length > 0
+
   return (
     <Routes>
       <Route
@@ -89,7 +91,7 @@ export default function AppRoutes({
         path='/dashboard'
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            {data.length || useMode === UseMode.MOCKING ? (
+            {dataExists ? (
               <DashboardPage logoutUser={logoutUser} data={data} />
             ) : (
               <Navigate to='/login' replace />
