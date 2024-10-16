@@ -15,25 +15,45 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfig {
-
+@EnableWebMvc
+public class SecurityConfig implements WebMvcConfigurer{
     @Autowired
     private CustomUserDetailsService userDetailsService;
 
     @Bean
+    protected void configure(HttpSecurity http) throws Exception {
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource())) // Activa CORS
+                .csrf(AbstractHttpConfigurer::disable) // Desactiva CSRF
+                .authorizeHttpRequests((requests) -> requests
+                        .requestMatchers("/public/**").permitAll()
+                        .anyRequest().authenticated()
+                );
+    }
+
+    @Override
+    public void addCorsMappings(org.springframework.web.servlet.config.annotation.CorsRegistry registry) {
+        registry.addMapping("/**")
+                .allowedOrigins("*")
+                .allowedMethods("*");
+    }
+
+
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Origen permitido
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Métodos permitidos
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type")); // Encabezados permitidos
-        configuration.setAllowCredentials(true); // Permitir el uso de credenciales
-        configuration.setMaxAge(3600L); // Duración de validez de la configuración CORS en segundos
+        configuration.setAllowedOrigins(List.of("http://localhost:5173")); // Especificar el origen
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept")); // Asegúrate de incluir "Accept"
+        configuration.setAllowCredentials(true); // Permitir credenciales
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); // Aplicar configuración a todas las rutas
@@ -45,13 +65,8 @@ public class SecurityConfig {
         http.cors(c -> c.configurationSource(corsConfigurationSource())) // Asegúrate de que esto esté primero
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers("/public/api/v1/health").permitAll()
-                        .requestMatchers("/public/login").permitAll()
-                        .requestMatchers("/public/register").permitAll()
-                        .requestMatchers("/public/processing-status").permitAll()
-                        .requestMatchers("/public/process-data").permitAll()
-                        .requestMatchers("/public/save-data").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Permitir solicitudes OPTIONS (preflight)
+                        .requestMatchers("/public/**").permitAll() // Configura tus rutas públicas
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .anyRequest().hasAnyRole("USER", "ADMIN")
                 )
@@ -60,10 +75,10 @@ public class SecurityConfig {
         return http.build();
     }
 
-
     // Bean para el cifrado de contraseñas
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();  // Usar BCrypt para cifrar las contraseñas
     }
 }
+
