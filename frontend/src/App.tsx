@@ -6,14 +6,17 @@ import {
   Routes,
   Navigate,
 } from 'react-router-dom'
+//@ts-ignore
 import { AnimatedBackground } from 'animated-backgrounds'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
-import LandingPage from './pages/LandingPage'
+import { UseMode } from './lib/types'
+import SelectModePage from './pages/SelectModePage'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isDataFetched, setIsDataFetched] = useState(false)
+  const [useMode, setUseMode] = useState<UseMode>(UseMode.NONE)
 
   const logoutUser = () => {
     setIsAuthenticated(false)
@@ -31,11 +34,7 @@ function App() {
           path='/login'
           element={
             isAuthenticated ? (
-              isDataFetched ? (
-                <Navigate to='/dashboard' replace />
-              ) : (
-                <Navigate to='/landing' replace />
-              )
+              <Navigate to='/select-mode' replace />
             ) : (
               <>
                 <AnimatedBackground
@@ -48,15 +47,46 @@ function App() {
           }
         />
 
-        {/* Ruta protegida de Landing */}
+        {/* Ruta protegida de Selección de Modo de Uso */}
         <Route
-          path='/landing'
+          path='/select-mode'
           element={
             isAuthenticated ? (
-              <LandingPage
-                logoutUser={logoutUser}
-                setIsDataFetched={setIsDataFetched}
-              />
+              <SelectModePage logoutUser={logoutUser} setMode={setUseMode} />
+            ) : (
+              <Navigate to='/login' replace />
+            )
+          }
+        />
+
+        {/* Ruta protegida de Real Time Configuration */}
+        <Route
+          path='/real-time-configuration'
+          element={
+            isAuthenticated ? (
+              useMode === UseMode.REAL_TIME ? (
+                //TODO: implement component
+                <></>
+              ) : (
+                <Navigate to='/select-mode' replace />
+              )
+            ) : (
+              <Navigate to='/login' replace />
+            )
+          }
+        />
+
+        {/* Ruta protegida de Near Real Time Configuration */}
+        <Route
+          path='/near-real-time-configuration'
+          element={
+            isAuthenticated ? (
+              useMode === UseMode.NEAR_REAL_TIME ? (
+                //TODO: implement component
+                <></>
+              ) : (
+                <Navigate to='/select-mode' replace />
+              )
             ) : (
               <Navigate to='/login' replace />
             )
@@ -67,7 +97,8 @@ function App() {
         <Route
           path='/dashboard'
           element={
-            isAuthenticated && isDataFetched ? (
+            isAuthenticated &&
+            (isDataFetched || useMode === UseMode.MOCKING) ? (
               <DashboardPage logoutUser={logoutUser} />
             ) : (
               <Navigate to='/login' replace />
