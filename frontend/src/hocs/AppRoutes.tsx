@@ -48,7 +48,11 @@ export default function AppRoutes({
           <ProtectedRoute isAuthenticated={isAuthenticated}>
             <>
               <AnimatedBackgroundWrapper />
-              <SelectModePage logoutUser={logoutUser} setMode={setUseMode} />
+              <SelectModePage
+                logoutUser={logoutUser}
+                setMode={setUseMode}
+                setData={setData}
+              />
             </>
           </ProtectedRoute>
         }

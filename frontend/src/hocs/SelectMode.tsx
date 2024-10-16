@@ -1,13 +1,16 @@
 import Card from '@/components/Card'
-import { UseMode } from '@/lib/types'
+import { decodeData } from '@/lib/dataService'
+import { mockData } from '@/lib/mock'
+import { BiologicalData, UseMode } from '@/lib/types'
 import { SetStateAction } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 export interface SelectModeProps {
   setMode: (value: SetStateAction<UseMode>) => void
+  setData: (value: SetStateAction<BiologicalData[]>) => void
 }
 
-function SelectMode({ setMode }: SelectModeProps) {
+function SelectMode({ setMode, setData }: SelectModeProps) {
   const navigate = useNavigate()
 
   const updateMode = ({
@@ -50,9 +53,10 @@ function SelectMode({ setMode }: SelectModeProps) {
           title='Mocking Data'
           description='Configuración que obtiene los datos de mock para visualizarlos sin necesidad de levantar el Backend ni la Base de Datos.'
           caption='Empezar'
-          handleSelection={() =>
+          handleSelection={() => {
+            setData(decodeData({ data: mockData }))
             updateMode({ newMode: UseMode.MOCKING, redirectTo: '/dashboard' })
-          }
+          }}
         />
       </div>
     </div>
