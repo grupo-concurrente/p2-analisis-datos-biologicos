@@ -1,19 +1,10 @@
-import { useEffect, useState } from 'react'
 import { BiologicalData } from '@/lib/types'
-import { decodeData, fetchData } from '@/lib/dataService'
 
-export default function Dashboard() {
-  const [data, setData] = useState<BiologicalData[]>([])
+export interface DashboardProps {
+  data: BiologicalData[]
+}
 
-  useEffect(() => {
-    const fetchDataAsync = async () => {
-      const { biologicalData } = await fetchData(true)
-      setData(decodeData({ data: biologicalData }))
-    }
-
-    fetchDataAsync()
-  }, [])
-
+export default function Dashboard({ data }: DashboardProps) {
   return (
     <div className='w-full h-full grid grid-cols-9 grid-rows-6 gap-4 pt-16'>
       <div className='col-span-4 row-span-4 bg-red-500'>
