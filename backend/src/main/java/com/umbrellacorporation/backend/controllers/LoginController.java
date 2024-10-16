@@ -3,7 +3,6 @@ package com.umbrellacorporation.backend.controllers;
 import com.umbrellacorporation.backend.dto.LoginRequest;
 import com.umbrellacorporation.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -29,11 +28,16 @@ public class LoginController {
         boolean isValid = userService.verifyUser(loginRequest.getEmail(), loginRequest.getPassword());
 
         if (isValid) {
-            simpMessagingTemplate.convertAndSend("/topic/login", "Inicio de sesión exitoso para " + loginRequest.getEmail());
+            simpMessagingTemplate.convertAndSend("/login", "Inicio de sesión exitoso para " + loginRequest.getEmail());
             return ResponseEntity.ok("Login successful");
         } else {
             return ResponseEntity.status(401).body("Invalid user or password");
         }
+    }
+    @MessageMapping("/login")
+    @SendTo("/login")
+    public String handleLogin(String message) {
+        return "Inicio de sesión exitoso: " + message;
     }
 }
 

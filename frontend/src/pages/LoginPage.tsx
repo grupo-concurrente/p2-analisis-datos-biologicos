@@ -24,13 +24,12 @@ export default function LoginPage({ authSession }: LoginProps) {
 
   const toggleRegisterLogin = () => setIsLoginForm((prevState) => !prevState)
 
-
   useEffect(() => {
     const client = new Client({
       brokerURL: 'ws://localhost:8080/ws',
       onConnect: () => {
         console.log('Conectado a STOMP');
-        client.subscribe('/topic/login', (message) => {
+        client.subscribe('/login', (message) => {
           alert(message.body);
           setIsConnected(true)
         });
@@ -63,7 +62,7 @@ export default function LoginPage({ authSession }: LoginProps) {
       if (isConnected && stompClient) {
         try {
           stompClient.publish({
-            destination: '/app/login',
+            destination: '/login',
             body: JSON.stringify({ email }),
           });
         } catch (error) {
