@@ -38,7 +38,7 @@ public class DataProcessingController {
     public ResponseEntity<String> processData(@RequestParam int numThreads) {
         try {
             // Comando para ejecutar el script de Python
-            String[] command = {"./venv/bin/python3", "./process_data.py", String.valueOf(numThreads)};
+            String[] command = {"venv/bin/python3", "./process_data.py", String.valueOf(numThreads)};
 
             // Registrar el tiempo de inicio
             long startTime = System.currentTimeMillis();
