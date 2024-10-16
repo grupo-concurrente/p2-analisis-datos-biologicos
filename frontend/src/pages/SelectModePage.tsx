@@ -1,9 +1,12 @@
 import Header from '@/components/Header'
-import Landing from '@/hocs/Landing'
+import SelectMode, { SelectModeProps } from '@/hocs/SelectMode'
+import { BasePageProps } from '@/lib/types'
 //@ts-ignore
 import { AnimatedBackground } from 'animated-backgrounds'
 
-function LandingPage({ logoutUser, setIsDataFetched }: LandingPageProps) {
+interface SelectModePageProps extends BasePageProps, SelectModeProps {}
+
+function SelectModePage({ logoutUser, setMode }: SelectModePageProps) {
   return (
     <div className='select-none w-screen h-screen p-0 m-0'>
       <AnimatedBackground
@@ -11,9 +14,9 @@ function LandingPage({ logoutUser, setIsDataFetched }: LandingPageProps) {
         style={{ opacity: 0.08 }}
       />
       <Header handleLogout={logoutUser} />
-      <Landing setIsDataFetched={setIsDataFetched} />
+      <SelectMode setMode={setMode} />
     </div>
   )
 }
 
-export default LandingPage
+export default SelectModePage
