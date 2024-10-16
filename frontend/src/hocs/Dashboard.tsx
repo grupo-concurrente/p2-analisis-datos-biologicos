@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { decodeData, fetchData } from '@/lib/utils'
 import { BiologicalData } from '@/lib/types'
+import { decodeData, fetchData } from '@/lib/dataService'
 
 export default function Dashboard() {
   const [data, setData] = useState<BiologicalData[]>([])

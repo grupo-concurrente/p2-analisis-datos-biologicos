@@ -5,7 +5,7 @@ import Logo from '@/components/Logo'
 import AuthForm from '@/components/login/AuthForm'
 import FormMessage from '@/components/login/FormMessage'
 import FormHeader from '@/components/login/FormHeader'
-import { authenticateUser, registerUser } from '@/lib/utils'
+import { authenticateUser, registerUser } from '@/lib/auth'
 
 interface LoginProps {
   authSession: () => void
