@@ -26,7 +26,7 @@ export default function LoginPage({ authSession }: LoginProps) {
 
   useEffect(() => {
     const client = new Client({
-      brokerURL: 'ws://localhost:8080/ws',
+      brokerURL: 'ws://localhost:5173/ws',
       onConnect: () => {
         console.log('Conectado a STOMP');
         client.subscribe('/login', (message) => {
