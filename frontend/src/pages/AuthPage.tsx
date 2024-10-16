@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Logo from '@/components/Logo'
+import Logo from '@/components/assets/Logo'
 import AuthForm from '@/components/login/AuthForm'
 import FormMessage from '@/components/login/FormMessage'
 import FormHeader from '@/components/login/FormHeader'
