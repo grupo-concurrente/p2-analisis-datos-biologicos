@@ -8,7 +8,7 @@ import {
 //@ts-ignore
 import { AnimatedBackground } from 'animated-backgrounds'
 import DashboardPage from './pages/DashboardPage'
-import LoginPage from './pages/LoginPage'
+import AuthPage from './pages/AuthPage'
 import { UseMode } from './lib/types'
 import SelectModePage from './pages/SelectModePage'
 
@@ -40,7 +40,7 @@ function App() {
                   animationName='cosmicDust'
                   style={{ opacity: 0.09 }}
                 />
-                <LoginPage authSession={authSession} />
+                <AuthPage authSession={authSession} />
               </>
             )
           }
