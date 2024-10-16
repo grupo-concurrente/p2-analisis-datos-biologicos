@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import Logo from '@/components/Logo'
-import AuthForm from '@/components/auth/AuthForm'
-import FormMessage from '@/components/auth/FormMessage'
-import FormHeader from '@/components/auth/FormHeader'
+import AuthForm from '@/components/login/AuthForm'
+import FormMessage from '@/components/login/FormMessage'
+import FormHeader from '@/components/login/FormHeader'
 import { authenticateUser, registerUser } from '@/lib/utils'
 
 interface LoginProps {
