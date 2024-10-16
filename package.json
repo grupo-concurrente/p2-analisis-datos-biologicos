@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "get-port": "^7.1.0",
+    "stomp": "^0.1.1"
+  }
+}
