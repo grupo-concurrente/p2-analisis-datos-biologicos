@@ -112,3 +112,18 @@ export const decodeSingleData = (entry: RawBiologicalData): BiologicalData => {
     skeletonFeatures: encodedLabels.skeleton_features[entry.skeletonFeatures],
   }
 }
+
+
+export const parseThreadProgressData = (
+  progressData: Record<string, number>
+): Array<{ name: string; progress: number }> => {
+  // Utilizamos Object.entries para obtener un array de pares [key, value]
+  return Object.entries(progressData).map(([key, value]) => {
+    // Extraemos el número del chunk y creamos el objeto en el formato requerido
+    const chunkNumber = key.split('_')[1] // Extraer el número del chunk
+    return {
+      name: chunkNumber,
+      progress: value,
+    }
+  })
+}

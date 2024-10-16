@@ -7,6 +7,7 @@ import DashboardPage from '@/pages/DashboardPage'
 import SelectModePage from '@/pages/SelectModePage'
 import { SetStateAction } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
+import NearRealTimeConfigurationPage from '@/pages/NearRealTimeConfigurationPage'
 
 interface AppRoutesProps {
   isAuthenticated: boolean
@@ -83,6 +84,7 @@ export default function AppRoutes({
           >
             <>
               <AnimatedBackgroundWrapper />
+              <NearRealTimeConfigurationPage logoutUser={logoutUser} />
             </>
           </ProtectedModeRoute>
         }

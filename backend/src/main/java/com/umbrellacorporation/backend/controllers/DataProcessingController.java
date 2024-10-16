@@ -2,16 +2,16 @@ package com.umbrellacorporation.backend.controllers;
 
 import com.opencsv.CSVReader;
 import com.umbrellacorporation.backend.models.BiologicalData;
-import com.umbrellacorporation.backend.models.User;
-import com.umbrellacorporation.backend.repositories.BiologicalDataRepository;
 import com.umbrellacorporation.backend.services.BiologicalDataService;
-import com.umbrellacorporation.backend.services.UserService;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -34,9 +34,27 @@ public class DataProcessingController {
         return dataService.getDataEntries();
     }
 
+    @GetMapping("/processing-status")
+    public ResponseEntity<?> getProcessingStatus() {
+        try {
+            // Leer el archivo JSON
+            String filePath = "./data/progress.json";
+            FileReader reader = new FileReader(filePath);
+            JSONParser jsonParser = new JSONParser();
+            Object obj = jsonParser.parse(reader);
+
+            // Devolver el contenido del archivo como respuesta
+            return ResponseEntity.ok(obj);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error al obtener el progreso: " + e.getMessage());
+        }
+    }
+
     @PostMapping("/process-data")
     public ResponseEntity<String> processData(@RequestParam int numThreads) {
         try {
+            resetProcessingStatus(numThreads);
             // Comando para ejecutar el script de Python
             String[] command = {"./venv/bin/python3", "./process_data.py", String.valueOf(numThreads)};
 
@@ -55,7 +73,6 @@ public class DataProcessingController {
                 long endTime = System.currentTimeMillis();
                 long duration = endTime - startTime;
                 double durationInSeconds = duration / 1000.0;
-
                 return ResponseEntity.ok(String.valueOf(durationInSeconds));
             } else {
                 // Si algo falla, devolver un error
@@ -67,15 +84,39 @@ public class DataProcessingController {
         }
     }
 
+    // Método para sobrescribir el archivo de progreso
+    private void resetProcessingStatus(int nThreads) {
+        try (FileWriter fileWriter = new FileWriter("./data/progress.json")) {
+            // Crear un objeto JSON con valores a 0
+            JSONObject jsonObject = new JSONObject();
+            JSONArray threadsArray = new JSONArray();
+
+            // Suponiendo que tienes 9 hilos, puedes modificar esto según tus necesidades
+            for (int i = 1; i <= nThreads; i++) {
+                JSONObject threadStatus = new JSONObject();
+                threadStatus.put("thread_" + i, 0); // Establecer el progreso a 0
+                threadsArray.add(threadStatus);
+            }
+
+            jsonObject.put("progress", threadsArray);
+            fileWriter.write(jsonObject.toJSONString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    //Exponer un endpoint saving-status que haga lo mismo que processing-status pero con los hilos de guardado
+
     @PostMapping("/save-data")
     public ResponseEntity<String> saveData(@RequestParam int numThreads) {
         try {
+            resetProcessingStatus(numThreads);
             String csvFilePath = "./data/processed_data.csv";
 
             // Registrar el tiempo de inicio
             long startTime = System.currentTimeMillis();
 
-            //Guardar en la BBDD
+            // Guardar en la BBDD
             readCsvAndSaveToDatabase(csvFilePath, numThreads);
 
             // Registrar el tiempo de finalización
@@ -89,7 +130,6 @@ public class DataProcessingController {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Excepción al ejecutar el script: " + e.getMessage());
         }
-
     }
 
     private void readCsvAndSaveToDatabase(String csvFilePath, int numThreads) {
