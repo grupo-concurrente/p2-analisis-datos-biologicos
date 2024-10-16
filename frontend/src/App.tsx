@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react'
 import { BrowserRouter as Router } from 'react-router-dom'
-import { UseMode } from './lib/types'
-import AppRoutes from './hocs/routes/AppRoutes'
+import { BiologicalData, UseMode } from './lib/types'
+import AppRoutes from './hocs/AppRoutes'
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [isDataFetched, setIsDataFetched] = useState(false)
+  const [data, setData] = useState<BiologicalData[]>([])
   const [useMode, setUseMode] = useState<UseMode>(UseMode.NONE)
 
   // Verifica si hay una sesión guardada en el localStorage
@@ -31,7 +31,8 @@ function App() {
       <AppRoutes
         isAuthenticated={isAuthenticated}
         useMode={useMode}
-        isDataFetched={isDataFetched}
+        data={data}
+        setData={setData}
         authSession={authSession}
         logoutUser={logoutUser}
         setUseMode={setUseMode}

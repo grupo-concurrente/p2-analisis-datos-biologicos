@@ -1,13 +1,14 @@
-import Header from '@/components/Header'
-import Dashboard from '@/hocs/Dashboard'
+import Dashboard, { DashboardProps } from '@/hocs/Dashboard'
+import GenericPage from '@/hocs/GenericPage'
 import { BasePageProps } from '@/lib/types'
 
-function DashboardPage({ logoutUser }: BasePageProps) {
+interface DashboardPageProps extends BasePageProps, DashboardProps {}
+
+const DashboardPage: React.FC<DashboardPageProps> = ({ logoutUser, data }) => {
   return (
-    <div className='select-none w-screen h-screen p-0 m-0'>
-      <Header handleLogout={logoutUser} />
-      <Dashboard />
-    </div>
+    <GenericPage logoutUser={logoutUser}>
+      <Dashboard data={data} />
+    </GenericPage>
   )
 }
 

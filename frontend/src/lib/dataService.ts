@@ -1,13 +1,11 @@
 import axios from 'axios'
 import { RawBiologicalData } from './types'
 import { encodedLabels } from './labelEncoding'
-import { mockData } from './mock'
 
 // Función para obtener los datos de sensores y lecturas
-export const fetchData = async (
-  isMock?: boolean
-): Promise<{ biologicalData: RawBiologicalData[] }> => {
-  if (isMock) return { biologicalData: mockData }
+export const fetchData = async (): Promise<{
+  biologicalData: RawBiologicalData[]
+}> => {
   try {
     // Obtener las credenciales cifradas del localStorage
     const storedCredentials = localStorage.getItem('session_credentials')
