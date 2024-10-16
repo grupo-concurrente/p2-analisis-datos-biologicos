@@ -1,6 +1,6 @@
 import Header from '@/components/Header'
 import Landing from '@/hocs/Landing'
-import { LandingPageProps } from '@/lib/types'
+//@ts-ignore
 import { AnimatedBackground } from 'animated-backgrounds'
 
 function LandingPage({ logoutUser, setIsDataFetched }: LandingPageProps) {
