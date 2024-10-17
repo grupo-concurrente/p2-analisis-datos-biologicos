@@ -1,5 +1,5 @@
 import GenericPage from '@/hocs/GenericPage'
-import NearRealTimeConfiguration from '@/hocs/NearRealTimeConfiguration/NearRealTimeConfiguration'
+import NearRealTimeConfiguration from '@/hocs/NearRealTimeConfiguration'
 import { BasePageProps } from '@/lib/types'
 
 interface NearRealTimeConfigurationPageProps extends BasePageProps {}
