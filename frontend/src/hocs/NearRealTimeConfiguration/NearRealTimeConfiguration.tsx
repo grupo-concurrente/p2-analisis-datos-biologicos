@@ -153,7 +153,7 @@ function NearRealTimeConfiguration() {
             intervalId && clearInterval(intervalId) // Limpiar el intervalo en caso de error
           })
       }, 200)
-    }, 500)
+    }, 900)
     try {
       // Llamar al post para iniciar el procesamiento
       await axios.post('http://localhost:8080/public/save-data', null, {
@@ -196,6 +196,28 @@ function NearRealTimeConfiguration() {
       }[]
     )
   }, [preprocessingSelectedThreads])
+
+  // Actualizar el progreso de los hilos activos cada vez que cambien los hilos seleccionados
+  useEffect(() => {
+    const activeThreadsProgress = savingSelectedThreads
+      .map((isActive, index) => {
+        if (isActive) {
+          return {
+            name: `${index + 1}`, // Usamos el índice como el nombre del hilo
+            progress: 0, // Progreso inicial en 0
+          }
+        }
+        return null
+      })
+      .filter((thread) => thread !== null) // Eliminamos los valores inactivos (null)
+
+    setSavingThreadsProgress(
+      activeThreadsProgress as {
+        name: string
+        progress: number
+      }[]
+    )
+  }, [savingSelectedThreads])
 
   return (
     <div className='w-full h-full flex justify-around items-center gap-12 pt-20 p-10'>
@@ -301,7 +323,7 @@ function NearRealTimeConfiguration() {
                 'opacity-30'
               }`}
             >
-              <ThreadProgressBarChart data={preprocessingThreadsProgress} />
+              <ThreadProgressBarChart data={savingThreadsProgress} />
             </div>
             {currentStage === NEAR_REAL_TIME_STAGES.SAVING_CONFIGURATION && (
               <div

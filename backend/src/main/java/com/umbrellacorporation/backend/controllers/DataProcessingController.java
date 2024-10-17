@@ -3,7 +3,6 @@ package com.umbrellacorporation.backend.controllers;
 import com.opencsv.CSVReader;
 import com.umbrellacorporation.backend.models.BiologicalData;
 import com.umbrellacorporation.backend.services.BiologicalDataService;
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +16,19 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 @RestController
 @RequestMapping("public")
 public class DataProcessingController {
 
     private final BiologicalDataService dataService;
+    private AtomicIntegerArray percentages;
 
     @Autowired
     public DataProcessingController(BiologicalDataService dataService) {
         this.dataService = dataService;
+        this.percentages = null;
     }
 
     @GetMapping("/biological-data")
@@ -87,25 +89,21 @@ public class DataProcessingController {
     // Método para sobrescribir el archivo de progreso
     private void resetProcessingStatus(int nThreads) {
         try (FileWriter fileWriter = new FileWriter("./data/progress.json")) {
-            // Crear un objeto JSON con valores a 0
+            // Crear un objeto JSON
             JSONObject jsonObject = new JSONObject();
-            JSONArray threadsArray = new JSONArray();
 
-            // Suponiendo que tienes 9 hilos, puedes modificar esto según tus necesidades
+            // Añadir cada chunk con un valor inicial de 0
             for (int i = 1; i <= nThreads; i++) {
-                JSONObject threadStatus = new JSONObject();
-                threadStatus.put("thread_" + i, 0); // Establecer el progreso a 0
-                threadsArray.add(threadStatus);
+                jsonObject.put("chunk_" + i, 0); // Establecer el progreso a 0
             }
 
-            jsonObject.put("progress", threadsArray);
+            // Escribir el objeto JSON en el archivo
             fileWriter.write(jsonObject.toJSONString());
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    //Exponer un endpoint saving-status que haga lo mismo que processing-status pero con los hilos de guardado
 
     @PostMapping("/save-data")
     public ResponseEntity<String> saveData(@RequestParam int numThreads) {
@@ -179,17 +177,67 @@ public class DataProcessingController {
             e.printStackTrace();
             return;
         }
-        dataService.deleteAllDataEntries();
+        //dataService.deleteAllDataEntries();
         saveDataInParallel(dataList, numThreads);
     }
+
+    @GetMapping("/saving-status")
+    public ResponseEntity<?> getProgress() {
+        if (percentages == null) {
+            return ResponseEntity.status(404).body("El procesamiento aún no ha comenzado.");
+        }
+
+        // Convertir AtomicIntegerArray a un array normal para devolver en la respuesta
+        int[] progressArray = new int[percentages.length()];
+        for (int i = 0; i < percentages.length(); i++) {
+            progressArray[i] = percentages.get(i);
+        }
+
+        // Crear un objeto JSON con los chunks y sus porcentajes
+        JSONObject jsonResponse = new JSONObject();
+        for (int i = 0; i < progressArray.length; i++) {
+            jsonResponse.put("chunk_" + (i + 1), progressArray[i]);
+        }
+
+        return ResponseEntity.ok(jsonResponse);
+    }
+
 
     private void saveDataInParallel(List<BiologicalData> dataList, int numThreads) {
         ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
 
-        for (BiologicalData data : dataList) {
+        // Calcular el tamaño de cada chunk
+        int chunkSize = (int) Math.ceil((double) dataList.size() / numThreads);
+        List<List<BiologicalData>> chunks = new ArrayList<>();
+
+        // Dividir dataList en chunks equitativos
+        for (int i = 0; i < dataList.size(); i += chunkSize) {
+            int end = Math.min(i + chunkSize, dataList.size());
+            chunks.add(dataList.subList(i, end));
+        }
+
+        // Crear un array para los porcentajes de progreso de cada chunk
+        this.percentages = new AtomicIntegerArray(numThreads);
+
+        // Contador para numerar los hilos (chunks)
+        int[] chunkCounter = {1}; // Usamos un array para poder modificarlo dentro de lambdas
+
+        // Procesar cada chunk en paralelo
+        for (List<BiologicalData> chunk : chunks) {
+            int currentChunkIndex = chunkCounter[0] - 1; // Guardamos el índice actual del chunk
             executorService.submit(() -> {
-                dataService.addNewDataEntry(data);
+                int entriesProcessed = 0;
+                for (BiologicalData data : chunk) {
+                    dataService.addNewDataEntry(data);
+                    entriesProcessed++;
+                    int percentage = Math.round((float) (entriesProcessed * 100) / chunk.size());
+                    // Actualizamos el porcentaje si es mayor que el porcentaje anterior
+                    if (percentage > percentages.get(currentChunkIndex)) {
+                        percentages.set(currentChunkIndex, percentage);
+                    }
+                }
             });
+            chunkCounter[0]++;
         }
 
         executorService.shutdown();

@@ -26,10 +26,10 @@ function SelectMode({ setMode, setData }: SelectModeProps) {
 
   return (
     <div className='w-full h-full flex flex-col justify-center items-center'>
-      <div className='w-4/5 flex justify-center items-center gap-20'>
+      <div className='w-full px-40 flex justify-center items-center gap-20'>
         <Card
           title='Real-Time'
-          description='Configuración Real-Time basada en un Data Strem en directo con WebSockets que comunica Backend y Frontend.'
+          description='Configuración basada un flujo de datos en vivo utilizando WebSockets que conecta el Backend con el Frontend.'
           caption='Empezar'
           handleSelection={() =>
             updateMode({
@@ -40,7 +40,7 @@ function SelectMode({ setMode, setData }: SelectModeProps) {
         />
         <Card
           title='Near Real-Time'
-          description='Configuración Near Real-Time en la que se procesan los datos juntos y se transmiten en una única trama al Frontend.'
+          description='Configuración que procesa los datos concurrentemente en el Backend y los envía al Frontend en un solo paquete.'
           caption='Empezar'
           handleSelection={() =>
             updateMode({
@@ -51,7 +51,7 @@ function SelectMode({ setMode, setData }: SelectModeProps) {
         />
         <Card
           title='Mocking Data'
-          description='Configuración que obtiene los datos de mock para visualizarlos sin necesidad de levantar el Backend ni la Base de Datos.'
+          description='Configuración que permite visualizar datos simulados sin necesidad de iniciar el Backend o la Base de Datos.'
           caption='Empezar'
           handleSelection={() => {
             setData(decodeData({ data: mockData }))
