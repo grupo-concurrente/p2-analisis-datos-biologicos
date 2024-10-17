@@ -28,8 +28,6 @@ export default function AppRoutes({
   logoutUser,
   setUseMode,
 }: AppRoutesProps) {
-  const dataExists = data.length > 0
-
   return (
     <Routes>
       <Route
@@ -84,7 +82,10 @@ export default function AppRoutes({
           >
             <>
               <AnimatedBackgroundWrapper />
-              <NearRealTimeConfigurationPage logoutUser={logoutUser} />
+              <NearRealTimeConfigurationPage
+                logoutUser={logoutUser}
+                setData={setData}
+              />
             </>
           </ProtectedModeRoute>
         }
@@ -93,7 +94,7 @@ export default function AppRoutes({
         path='/dashboard'
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            {dataExists ? (
+            {data.length > 0 ? (
               <DashboardPage logoutUser={logoutUser} data={data} />
             ) : (
               <Navigate to='/login' replace />

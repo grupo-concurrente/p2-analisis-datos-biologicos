@@ -6,19 +6,29 @@ import { PassiveThreadIcon } from '@/components/assets/PassiveThreadIcon'
 import { PlayButtonIcon } from '@/components/assets/PlayButtonIcon'
 import { WorkingThreadIcon } from '@/components/assets/WorkingThreadIcon'
 import ThreadProgressBarChart from '@/components/charts/ThreadProgressBarChart'
+import { Button } from '@/components/ui/button'
+import { decodeData, fetchData } from '@/lib/dataService'
+import { BiologicalData } from '@/lib/types'
 import axios from 'axios'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, SetStateAction } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 enum NEAR_REAL_TIME_STAGES {
   PREPROCESSING_CONFIGURATION,
   PREPROCESSING,
   SAVING_CONFIGURATION,
   SAVING,
-  FETCHING,
   FINISH,
 }
 
-function NearRealTimeConfiguration() {
+interface NearRealTimeConfigurationProps {
+  setData: (value: SetStateAction<BiologicalData[]>) => void
+}
+
+function NearRealTimeConfiguration({
+  setData,
+}: NearRealTimeConfigurationProps) {
+  const navigate = useNavigate()
   const [currentStage, setCurrentStage] = useState<NEAR_REAL_TIME_STAGES>(
     NEAR_REAL_TIME_STAGES.PREPROCESSING_CONFIGURATION
   )
@@ -161,6 +171,9 @@ function NearRealTimeConfiguration() {
           numThreads: savingSelectedThreads.filter(Boolean).length,
         },
       })
+      await fetchData().then((response) =>
+        setData(decodeData({ data: response.biologicalData }))
+      )
     } catch (error) {
       console.error('Error en el procesamiento:', error)
       intervalId && clearInterval(intervalId) // Limpiar el intervalo en caso de error
@@ -172,7 +185,7 @@ function NearRealTimeConfiguration() {
   }
 
   const finishSaving = () => {
-    setCurrentStage(NEAR_REAL_TIME_STAGES.FETCHING)
+    setCurrentStage(NEAR_REAL_TIME_STAGES.FINISH)
   }
 
   // Actualizar el progreso de los hilos activos cada vez que cambien los hilos seleccionados
@@ -221,7 +234,11 @@ function NearRealTimeConfiguration() {
 
   return (
     <div className='w-full h-full flex justify-around items-center gap-12 pt-20 p-10'>
-      <div className='w-1/2 h-full flex flex-col items-center gap-4'>
+      <div
+        className={`w-1/2 h-full flex flex-col items-center gap-4 ${
+          currentStage === NEAR_REAL_TIME_STAGES.FINISH && 'opacity-30'
+        }`}
+      >
         <h1 className='text-3xl font-bold text-fuchsia-800 text-opacity-80'>
           FASE 1: PREPROCESADO
         </h1>
@@ -280,7 +297,8 @@ function NearRealTimeConfiguration() {
       <div
         className={`w-1/2 h-full flex flex-col items-center gap-4 ${
           (currentStage === NEAR_REAL_TIME_STAGES.PREPROCESSING_CONFIGURATION ||
-            currentStage === NEAR_REAL_TIME_STAGES.PREPROCESSING) &&
+            currentStage === NEAR_REAL_TIME_STAGES.PREPROCESSING ||
+            currentStage === NEAR_REAL_TIME_STAGES.FINISH) &&
           'opacity-30'
         }`}
       >
@@ -336,6 +354,14 @@ function NearRealTimeConfiguration() {
           </div>
         </div>
       </div>
+      {currentStage === NEAR_REAL_TIME_STAGES.FINISH && (
+        <Button
+          className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-fuchsia-800 hover:bg-fuchsia-700 p-16 text-4xl rounded-2xl opacity-90'
+          onClick={() => navigate('/dashboard')}
+        >
+          Ir al Dashboard Principal {'>>'}
+        </Button>
+      )}
     </div>
   )
 }
