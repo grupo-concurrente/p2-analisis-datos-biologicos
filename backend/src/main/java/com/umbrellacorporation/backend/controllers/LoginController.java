@@ -24,7 +24,7 @@ public class LoginController {
 
         if (isValid) {
             String mensaje = "Hola " + loginRequest.getEmail();
-            template.convertAndSend("/AuthPage", mensaje);
+            template.convertAndSend("/landing", mensaje);
             return ResponseEntity.ok("Login succeed");
         } else {
             return ResponseEntity.status(401).body("Invalid user or password");
