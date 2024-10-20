@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.nio.file.Files;
@@ -59,11 +60,7 @@ public class DataProcessingController {
     @PostMapping("/process-data")
     public ResponseEntity<String> processData(@RequestParam int numThreads) {
         try {
-            Path progressFilePath = Paths.get("./data/progress.json");
-            if (Files.exists(progressFilePath)) {
-                Files.delete(progressFilePath);
-            }
-
+            
             // Comando para ejecutar el script de Python
             String[] command = {"./venv/bin/python3", "./process_data.py", String.valueOf(numThreads)};
 
@@ -95,7 +92,13 @@ public class DataProcessingController {
 
     // Método para sobrescribir el archivo de progreso
     private void resetProcessingStatus(int nThreads) {
-        try (FileWriter fileWriter = new FileWriter("./data/progress.json")) {
+        File file = new File("./data/progress.json");
+
+        if (!file.exists()) {
+            return; // Salir del método si el archivo no existe
+        }
+
+        try (FileWriter fileWriter = new FileWriter(file)) {
             // Crear un objeto JSON
             JSONObject jsonObject = new JSONObject();
 
