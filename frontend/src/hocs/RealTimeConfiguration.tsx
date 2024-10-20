@@ -7,30 +7,27 @@ import { PlayButtonIcon } from '@/components/assets/PlayButtonIcon'
 import { WorkingThreadIcon } from '@/components/assets/WorkingThreadIcon'
 import ThreadProgressBarChart from '@/components/charts/ThreadProgressBarChart'
 import { Button } from '@/components/ui/button'
-import { decodeData, fetchData } from '@/lib/dataService'
-import { BiologicalData } from '@/lib/types'
 import axios from 'axios'
-import { useState, useEffect, SetStateAction } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-enum NEAR_REAL_TIME_STAGES {
+enum REAL_TIME_STAGES {
   PREPROCESSING_CONFIGURATION,
   PREPROCESSING,
   SAVING_CONFIGURATION,
-  SAVING,
   FINISH,
 }
 
-interface NearRealTimeConfigurationProps {
-  setData: (value: SetStateAction<BiologicalData[]>) => void
+interface RealTimeConfigurationProps {
+  triggerLiveFetching: ({ nThreads }: { nThreads: number }) => void
 }
 
-function NearRealTimeConfiguration({
-  setData,
-}: NearRealTimeConfigurationProps) {
+function RealTimeConfiguration({
+  triggerLiveFetching,
+}: RealTimeConfigurationProps) {
   const navigate = useNavigate()
-  const [currentStage, setCurrentStage] = useState<NEAR_REAL_TIME_STAGES>(
-    NEAR_REAL_TIME_STAGES.PREPROCESSING_CONFIGURATION
+  const [currentStage, setCurrentStage] = useState<REAL_TIME_STAGES>(
+    REAL_TIME_STAGES.PREPROCESSING_CONFIGURATION
   )
 
   const [preprocessingSelectedThreads, setPreprocessingSelectedThreads] =
@@ -103,7 +100,7 @@ function NearRealTimeConfiguration({
 
   const startPreprocessing = async () => {
     // Iniciar el preprocesado
-    setCurrentStage(NEAR_REAL_TIME_STAGES.PREPROCESSING)
+    setCurrentStage(REAL_TIME_STAGES.PREPROCESSING)
     let intervalId: NodeJS.Timeout | null = null
     setTimeout(() => {
       // Establecer un intervalo para obtener el progreso
@@ -141,52 +138,14 @@ function NearRealTimeConfiguration({
 
   const startSaving = async () => {
     // Iniciar el preprocesado
-    setCurrentStage(NEAR_REAL_TIME_STAGES.SAVING)
-    let intervalId: NodeJS.Timeout | null = null
-    setTimeout(() => {
-      // Establecer un intervalo para obtener el progreso
-      intervalId = setInterval(() => {
-        axios
-          .get('http://localhost:8080/public/saving-status')
-          .then((response) => {
-            const parsedProgress = parseThreadProgressData(response.data)
-            setSavingThreadsProgress(parsedProgress)
-
-            // Verificar si todos los hilos han alcanzado el 100%
-            if (parsedProgress.every((thread) => thread.progress === 100)) {
-              intervalId && clearInterval(intervalId) // Limpiar el intervalo
-              finishSaving() // Finalizar el preprocesado
-            }
-          })
-          .catch((error) => {
-            console.error('Error al obtener el progreso:', error)
-            intervalId && clearInterval(intervalId) // Limpiar el intervalo en caso de error
-          })
-      }, 200)
-    }, 900)
-    try {
-      // Llamar al post para iniciar el procesamiento
-      await axios.post('http://localhost:8080/public/save-data', null, {
-        params: {
-          numThreads: savingSelectedThreads.filter(Boolean).length,
-        },
-      })
-      await fetchData().then((response) =>
-        setData(decodeData({ data: response.biologicalData }))
-      )
-      intervalId && clearInterval(intervalId) // Limpiar el intervalo
-    } catch (error) {
-      console.error('Error en el procesamiento:', error)
-      intervalId && clearInterval(intervalId) // Limpiar el intervalo en caso de error
-    }
+    setCurrentStage(REAL_TIME_STAGES.FINISH)
+    triggerLiveFetching({
+      nThreads: savingSelectedThreads.filter(Boolean).length,
+    })
   }
 
   const finishPreprocessing = () => {
-    setCurrentStage(NEAR_REAL_TIME_STAGES.SAVING_CONFIGURATION)
-  }
-
-  const finishSaving = () => {
-    setCurrentStage(NEAR_REAL_TIME_STAGES.FINISH)
+    setCurrentStage(REAL_TIME_STAGES.SAVING_CONFIGURATION)
   }
 
   // Actualizar el progreso de los hilos activos cada vez que cambien los hilos seleccionados
@@ -237,7 +196,7 @@ function NearRealTimeConfiguration({
     <div className='w-full h-full flex justify-around items-center gap-12 pt-20 p-10'>
       <div
         className={`w-1/2 h-full flex flex-col items-center gap-4 ${
-          currentStage === NEAR_REAL_TIME_STAGES.FINISH && 'opacity-30'
+          currentStage === REAL_TIME_STAGES.FINISH && 'opacity-30'
         }`}
       >
         <h1 className='text-3xl font-bold text-fuchsia-800 text-opacity-80'>
@@ -249,9 +208,8 @@ function NearRealTimeConfiguration({
           </div>
           <div
             className={`flex justify-end mr-8 items-center ${
-              (currentStage ===
-                NEAR_REAL_TIME_STAGES.PREPROCESSING_CONFIGURATION ||
-                currentStage === NEAR_REAL_TIME_STAGES.PREPROCESSING) &&
+              (currentStage === REAL_TIME_STAGES.PREPROCESSING_CONFIGURATION ||
+                currentStage === REAL_TIME_STAGES.PREPROCESSING) &&
               'opacity-30'
             }`}
           >
@@ -264,7 +222,7 @@ function NearRealTimeConfiguration({
                   key={index}
                   onClick={() =>
                     currentStage ===
-                      NEAR_REAL_TIME_STAGES.PREPROCESSING_CONFIGURATION &&
+                      REAL_TIME_STAGES.PREPROCESSING_CONFIGURATION &&
                     toggleCurrentProcessingThreadStatus(index)
                   }
                 >
@@ -276,15 +234,13 @@ function NearRealTimeConfiguration({
           <div className='flex justify-center items-center row-start-2 relative'>
             <div
               className={`w-full h-full ${
-                currentStage ===
-                  NEAR_REAL_TIME_STAGES.PREPROCESSING_CONFIGURATION &&
+                currentStage === REAL_TIME_STAGES.PREPROCESSING_CONFIGURATION &&
                 'opacity-30'
               }`}
             >
               <ThreadProgressBarChart data={preprocessingThreadsProgress} />
             </div>
-            {currentStage ===
-              NEAR_REAL_TIME_STAGES.PREPROCESSING_CONFIGURATION && (
+            {currentStage === REAL_TIME_STAGES.PREPROCESSING_CONFIGURATION && (
               <div
                 className='absolute top-1/2 left-1/2 -translate-x-6 -translate-y-20'
                 onClick={startPreprocessing}
@@ -297,9 +253,9 @@ function NearRealTimeConfiguration({
       </div>
       <div
         className={`w-1/2 h-full flex flex-col items-center gap-4 ${
-          (currentStage === NEAR_REAL_TIME_STAGES.PREPROCESSING_CONFIGURATION ||
-            currentStage === NEAR_REAL_TIME_STAGES.PREPROCESSING ||
-            currentStage === NEAR_REAL_TIME_STAGES.FINISH) &&
+          (currentStage === REAL_TIME_STAGES.PREPROCESSING_CONFIGURATION ||
+            currentStage === REAL_TIME_STAGES.PREPROCESSING ||
+            currentStage === REAL_TIME_STAGES.FINISH) &&
           'opacity-30'
         }`}
       >
@@ -312,8 +268,7 @@ function NearRealTimeConfiguration({
           </div>
           <div
             className={`flex justify-center ml-20 mr-8 items-center ${
-              (currentStage === NEAR_REAL_TIME_STAGES.SAVING_CONFIGURATION ||
-                currentStage === NEAR_REAL_TIME_STAGES.SAVING) &&
+              currentStage === REAL_TIME_STAGES.SAVING_CONFIGURATION &&
               'opacity-30'
             }`}
           >
@@ -325,8 +280,7 @@ function NearRealTimeConfiguration({
                 <div
                   key={index}
                   onClick={() =>
-                    currentStage ===
-                      NEAR_REAL_TIME_STAGES.SAVING_CONFIGURATION &&
+                    currentStage === REAL_TIME_STAGES.SAVING_CONFIGURATION &&
                     toggleCurrentSavingThreadStatus(index)
                   }
                 >
@@ -338,13 +292,13 @@ function NearRealTimeConfiguration({
           <div className='flex justify-center items-center row-start-2 relative'>
             <div
               className={`w-full h-full ${
-                currentStage === NEAR_REAL_TIME_STAGES.SAVING_CONFIGURATION &&
+                currentStage === REAL_TIME_STAGES.SAVING_CONFIGURATION &&
                 'opacity-30'
               }`}
             >
               <ThreadProgressBarChart data={savingThreadsProgress} />
             </div>
-            {currentStage === NEAR_REAL_TIME_STAGES.SAVING_CONFIGURATION && (
+            {currentStage === REAL_TIME_STAGES.SAVING_CONFIGURATION && (
               <div
                 className='absolute top-1/2 left-1/2 -translate-x-6 -translate-y-20'
                 onClick={startSaving}
@@ -355,7 +309,7 @@ function NearRealTimeConfiguration({
           </div>
         </div>
       </div>
-      {currentStage === NEAR_REAL_TIME_STAGES.FINISH && (
+      {currentStage === REAL_TIME_STAGES.FINISH && (
         <Button
           className='absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-fuchsia-800 hover:bg-fuchsia-700 p-16 text-4xl rounded-2xl opacity-90'
           onClick={() => navigate('/dashboard')}
@@ -367,4 +321,4 @@ function NearRealTimeConfiguration({
   )
 }
 
-export default NearRealTimeConfiguration
+export default RealTimeConfiguration

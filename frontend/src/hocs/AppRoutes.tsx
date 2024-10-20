@@ -5,9 +5,12 @@ import { BiologicalData, UseMode } from '@/lib/types'
 import AuthPage from '@/pages/AuthPage'
 import DashboardPage from '@/pages/DashboardPage'
 import SelectModePage from '@/pages/SelectModePage'
-import { SetStateAction } from 'react'
+import { SetStateAction, useState } from 'react'
 import { Routes, Route, Navigate } from 'react-router-dom'
 import NearRealTimeConfigurationPage from '@/pages/NearRealTimeConfigurationPage'
+import RealTimeConfigurationPage from '@/pages/RealTimeConfigurationPage'
+import axios from 'axios'
+import { decodeData, fetchData } from '@/lib/dataService'
 
 interface AppRoutesProps {
   isAuthenticated: boolean
@@ -28,6 +31,31 @@ export default function AppRoutes({
   logoutUser,
   setUseMode,
 }: AppRoutesProps) {
+  const [isLiveFething, setIsLiveFetching] = useState(false)
+  const triggerLiveFetching = async ({ nThreads }: { nThreads: number }) => {
+    setIsLiveFetching(true)
+    let intervalId: NodeJS.Timeout | null = null
+    setTimeout(() => {
+      // Establecer un intervalo para obtener el progreso
+      intervalId = setInterval(async () => {
+        await fetchData().then((response) =>
+          setData(decodeData({ data: response.biologicalData }))
+        )
+      }, 200)
+    }, 900)
+    try {
+      // Llamar al post para iniciar el procesamiento
+      await axios.post('http://localhost:8080/public/save-data', null, {
+        params: {
+          numThreads: nThreads,
+        },
+      })
+      intervalId && clearInterval(intervalId) // Limpiar el intervalo
+    } catch (error) {
+      console.error('Error en el procesamiento:', error)
+      intervalId && clearInterval(intervalId) // Limpiar el intervalo en caso de error
+    }
+  }
   return (
     <Routes>
       <Route
@@ -68,6 +96,10 @@ export default function AppRoutes({
           >
             <>
               <AnimatedBackgroundWrapper />
+              <RealTimeConfigurationPage
+                logoutUser={logoutUser}
+                triggerLiveFetching={triggerLiveFetching}
+              />
             </>
           </ProtectedModeRoute>
         }
@@ -94,7 +126,7 @@ export default function AppRoutes({
         path='/dashboard'
         element={
           <ProtectedRoute isAuthenticated={isAuthenticated}>
-            {data.length > 0 ? (
+            {data.length > 0 || isLiveFething ? (
               <DashboardPage logoutUser={logoutUser} data={data} />
             ) : (
               <Navigate to='/login' replace />
