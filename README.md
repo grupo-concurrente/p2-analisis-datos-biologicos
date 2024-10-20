@@ -8,6 +8,19 @@ El sistema está diseñado para procesar grandes volúmenes de datos biológicos
 
 El backend implementa la lógica de procesamiento concurrente, mientras que el frontend permite visualizar métricas en tiempo real y gestionar el sistema de manera interactiva.
 
+## 🎥 Demo del Proyecto
+
+¡Mira una breve demo del proyecto en acción!
+
+
+
+
+https://github.com/user-attachments/assets/a2485634-2c52-4f1e-93bc-227adc7882e7
+
+
+
+
+
 ## 🏗️ Arquitectura General
 
 El monorepo incluye:
