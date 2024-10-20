@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -56,7 +59,11 @@ public class DataProcessingController {
     @PostMapping("/process-data")
     public ResponseEntity<String> processData(@RequestParam int numThreads) {
         try {
-            resetProcessingStatus(numThreads);
+            Path progressFilePath = Paths.get("./data/progress.json");
+            if (Files.exists(progressFilePath)) {
+                Files.delete(progressFilePath);
+            }
+
             // Comando para ejecutar el script de Python
             String[] command = {"./venv/bin/python3", "./process_data.py", String.valueOf(numThreads)};
 
@@ -177,7 +184,7 @@ public class DataProcessingController {
             e.printStackTrace();
             return;
         }
-        //dataService.deleteAllDataEntries();
+        dataService.deleteAllDataEntries();
         saveDataInParallel(dataList, numThreads);
     }
 
@@ -204,51 +211,65 @@ public class DataProcessingController {
 
 
     private void saveDataInParallel(List<BiologicalData> dataList, int numThreads) {
-        ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
+    ExecutorService executorService = Executors.newFixedThreadPool(numThreads);
 
-        // Calcular el tamaño de cada chunk
-        int chunkSize = (int) Math.ceil((double) dataList.size() / numThreads);
-        List<List<BiologicalData>> chunks = new ArrayList<>();
+    // Calcular el tamaño de cada chunk
+    int chunkSize = (int) Math.ceil((double) dataList.size() / numThreads);
+    List<List<BiologicalData>> chunks = new ArrayList<>();
 
-        // Dividir dataList en chunks equitativos
-        for (int i = 0; i < dataList.size(); i += chunkSize) {
-            int end = Math.min(i + chunkSize, dataList.size());
-            chunks.add(dataList.subList(i, end));
-        }
-
-        // Crear un array para los porcentajes de progreso de cada chunk
-        this.percentages = new AtomicIntegerArray(numThreads);
-
-        // Contador para numerar los hilos (chunks)
-        int[] chunkCounter = {1}; // Usamos un array para poder modificarlo dentro de lambdas
-
-        // Procesar cada chunk en paralelo
-        for (List<BiologicalData> chunk : chunks) {
-            int currentChunkIndex = chunkCounter[0] - 1; // Guardamos el índice actual del chunk
-            executorService.submit(() -> {
-                int entriesProcessed = 0;
-                for (BiologicalData data : chunk) {
-                    dataService.addNewDataEntry(data);
-                    entriesProcessed++;
-                    int percentage = Math.round((float) (entriesProcessed * 100) / chunk.size());
-                    // Actualizamos el porcentaje si es mayor que el porcentaje anterior
-                    if (percentage > percentages.get(currentChunkIndex)) {
-                        percentages.set(currentChunkIndex, percentage);
-                    }
-                }
-            });
-            chunkCounter[0]++;
-        }
-
-        executorService.shutdown();
-        try {
-            // Espera hasta que todas las tareas terminen
-            if (!executorService.awaitTermination(60, TimeUnit.MINUTES)) {
-                executorService.shutdownNow();
-            }
-        } catch (InterruptedException e) {
-            executorService.shutdownNow();
-            Thread.currentThread().interrupt();
-        }
+    // Dividir dataList en chunks equitativos
+    for (int i = 0; i < dataList.size(); i += chunkSize) {
+        int end = Math.min(i + chunkSize, dataList.size());
+        chunks.add(dataList.subList(i, end));
     }
+
+    // Crear un array para los porcentajes de progreso de cada chunk
+    this.percentages = new AtomicIntegerArray(numThreads);
+
+    // Contador para numerar los hilos (chunks)
+    int[] chunkCounter = {1}; // Usamos un array para poder modificarlo dentro de lambdas
+
+    // Procesar cada chunk en paralelo
+    for (List<BiologicalData> chunk : chunks) {
+        int currentChunkIndex = chunkCounter[0] - 1; // Guardamos el índice actual del chunk
+        executorService.submit(() -> {
+            int entriesProcessed = 0;
+            for (BiologicalData data : chunk) {
+                // Agregar la entrada de datos al servicio
+                dataService.addNewDataEntry(data);
+
+                // Simular un pequeño retardo para evitar que el procesamiento sea instantáneo
+                try {
+                    Thread.sleep(100); // Pausa de 100 milisegundos
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                entriesProcessed++;
+                int percentage = Math.round((float) (entriesProcessed * 100) / chunk.size());
+
+                // Actualizamos el porcentaje si es mayor que el porcentaje anterior
+                if (percentage > percentages.get(currentChunkIndex)) {
+                    percentages.set(currentChunkIndex, percentage);
+
+                    // Imprimir el progreso del chunk actual en la consola
+                    System.out.println("Progreso del chunk " + (currentChunkIndex + 1) + ": " + percentage + "%");
+                }
+            }
+        });
+        chunkCounter[0]++;
+    }
+
+    executorService.shutdown();
+    try {
+        // Esperar hasta que todas las tareas terminen
+        if (!executorService.awaitTermination(60, TimeUnit.MINUTES)) {
+            executorService.shutdownNow();
+        }
+    } catch (InterruptedException e) {
+        executorService.shutdownNow();
+        Thread.currentThread().interrupt();
+    }
+}
+
 }
