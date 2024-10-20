@@ -96,7 +96,7 @@ def normalize_data(chunk, chunk_number):
         chunk[col] = chunk[col].cat.codes
 
         # Simulación del tiempo de procesamiento proporcional al tamaño del chunk
-        processing_time = len(chunk) * 0.0001
+        processing_time = len(chunk) * 0.001
 
         # Añadir variación aleatoria del 50% al tiempo de procesamiento
         variation = processing_time * 0.5
