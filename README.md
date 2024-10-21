@@ -43,7 +43,7 @@ Sigue estos pasos para levantar el sistema completo:
 ### 1. Clonar el repositorio:
 
 ```bash
-git clone https://github.com/umbrella-corporation/data-analysis-system.git
+git clone https://github.com/grupo-concurrente/p2-analisis-datos-biologicos
 cd data-analysis-system
 ```
 
