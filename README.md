@@ -25,7 +25,7 @@ https://github.com/user-attachments/assets/a2485634-2c52-4f1e-93bc-227adc7882e7
 
 El monorepo incluye:
 
-- **Backend (Java)**: Procesamiento concurrente con **@Async**, **ExecutorService**, y **ForkJoinPool**.
+- **Backend (Java)**: Procesamiento concurrente con **@Async**, **ExecutorService**, y **ThreadPoolExecutor**.
 - **Frontend (React)**: Interfaz gráfica para la monitorización y gestión del sistema.
 - **PostgreSQL**: Base de datos para almacenar los datos biológicos procesados.
 - **Docker Compose**: Orquestación de los servicios para una fácil configuración y despliegue.
