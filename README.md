@@ -44,7 +44,7 @@ Sigue estos pasos para levantar el sistema completo:
 
 ```bash
 git clone https://github.com/grupo-concurrente/p2-analisis-datos-biologicos
-cd data-analysis-system
+cd p2-analisis-datos-biologicos
 ```
 
 ### 2. Levantar los servicios con Docker Compose:
