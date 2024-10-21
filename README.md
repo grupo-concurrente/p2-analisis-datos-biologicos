@@ -52,21 +52,40 @@ cd p2-analisis-datos-biologicos
 #### Instalar el entorno virtual de Python e instalar las dependencias de requirements.txt
 ```bash
 cd backend
+
+#Creamos el entorno virtual
 python3 -m venv venv
+
+#Activamos el entorno virtual e instalamos las dependencias
 source venv/bin/activate
 pip3 install -r requirements.txt
+
+#Salimos del entorno virtual
+deactivate
 ```
 
-#### Solo BBDD (Postgres) + Servidor Backend:
+#### Levantar BBDD y Frontend con Docker (El backend se levanta por separado debido a un problema con el contenedor)
 
 ```bash
-docker compose up postgres_db backend
-```
+#Salimos a la raíz del repositorio
+cd ..
 
-#### Aplicación completa (BBDD + Backend + Frontend)
-
-```bash
+#Levantamos los servicios de BBDD y Frontend
 docker compose up
+```
+
+#### Levantar Backend con Java
+
+```bash
+cd backend
+
+#Opción 1. Levantarlo en modo desarrollo
+./mvnw spring-boot:run
+
+#Opción 2. Compilar el ejecutable y levantar el servidor
+./mvnw clean
+./mvnw package
+java -Djava.security.egd=file:/dev/urandom -jar target/backend-0.0.1-SNAPSHOT.jar
 ```
 
 ### 4. Acceder a la aplicación:
