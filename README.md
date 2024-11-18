@@ -1,6 +1,6 @@
 # 🧬 Umbrella Corporation - Sistema de Análisis de Datos Concurrente
 
-Este repositorio contiene el **monorepo** para el sistema de análisis de datos concurrente de **Umbrella Corporation**, desarrollado para gestionar flujos de datos biológicos en tiempo real. Está compuesto por tres servicios principales: **backend (Java)**, **frontend (React)** y **base de datos (PostgreSQL)**, los cuales se pueden levantar utilizando **Docker Compose**.
+Este repositorio contiene el **monorepo** para el sistema de análisis de datos concurrente de **Umbrella Corporation**, desarrollado para gestionar flujos de datos biológicos en tiempo real. Está compuesto por tres servicios principales: **backend (Java)**, **frontend (React)** y **base de datos (PostgreSQL)**, los cuales se pueden levantar utilizando **Docker Compose**. Integrantes: Sergio, Pablo Barbosa, Augusto y Assil.
 
 ## 📋 Descripción
 
